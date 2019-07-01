@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.PositionDao">
+
+   <!-- 添加 -->
+    <insert id="addPosition" parameterType="TPosition">
+        insert into t_position (poName,deptId,poSalary,isDelete)
+       values (#{poName},#{deptId},#{poSalary},#{isDelete})
+       
+         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
+          select  uuid()   resultType="String"
+           -->
+        <selectKey keyColumn="poId" keyProperty="poId" resultType="int">
+             SELECT LAST_INSERT_ID()
+        </selectKey>
+    </insert>
+    
+    <!-- 修改 -->
+    <update id="updatePostion" parameterType="TPosition">
+        update t_position set poName=#{poName},deptId=#{deptId},poSalary=#{poSalary},
+        isDelete=#{isDelete} where poId=#{poId}
+    </update>
+
+   <!-- 自定义结果集 -->
+   <resultMap type="TPosition" id="resultPosition">
+       <!-- 主键 -->
+       <id column="poId" property="poId"/>
+       <!-- 其他属性 -->
+       <result column="poName" property="poName"/>
+       <result column="deptId" property="deptId"/>
+       <result column="poSalary" property="poSalary"/>
+       <result column="isDelete" property="isDelete"/>
+       <!-- 多对一 -->
+       <association property="department" javaType="TDepartment">
+             <!-- 主键 -->
+             <id column="deptId" property="deptId"/>
+             
+             <result column="deptName" property="deptName"/>
+             <result column="deptAddress" property="deptAddress"/>
+             <result column="deptPhone" property="deptPhone"/>
+             <result column="userId" property="userId"/>
+             <result column="isDelete" property="isDelete"/>
+       </association>
+   </resultMap>
+   <!-- 查询 -->
+   <select id="query" resultMap="resultPosition">
+       SELECT p.*,d.*
+		    from t_position p,t_department d
+		       where p.deptId=d.deptId
+   </select>
+   
+   
+   <!-- 根据职位id查询职位信息   parameterType:参数类型     resultType:结果类型-->
+   <select id="findByID" parameterType="int" resultType="TPosition">
+        select * from t_position where poId=#{poId}
+   </select>
+   
+   <!-- 根据名字模糊查询   #:参数值（字符串、整数、小数等）     ${}:字符串    concat:拼接
+   select * from t_position where poName like '%${names}%'-->
+   <select id="queryByName" parameterType="String" resultType="TPosition">
+       select * from t_position where poName like concat('%',concat(#{names},'%'))
+   </select>
+   
+   <sql id="conditionSql">
+        <if test="poName!=null and poName!=''">
+           and p.poName like concat('%',concat(#{poName},'%'))
+        </if>
+        <if test="poSalary1!=null">
+           <if test="poSalary2 == null">
+             and p.poSalary >= #{poSalary1}
+           </if>
+           <if test="poSalary2!=null">
+	           and p.poSalary between #{poSalary1} and #{poSalary2}
+	        </if>
+        </if>
+         
+        <if test="deptId != null and deptId !=''">
+            and p.deptId=#{deptId}
+        </if>
+   </sql>
+   
+   <!-- 根据条件查询 -->
+   <select id="queryByCondition" parameterType="map" resultMap="resultPosition" >
+       SELECT p.*,d.* from t_position p,t_department d where p.deptId=d.deptId 
+       <include refid="conditionSql"></include>
+   </select>
+
+</mapper>
+

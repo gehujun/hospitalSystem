@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.PositionMenuDao">
+
+   <!-- 登录查询 -->
+  <select id="findMenuByPoId" resultType="Integer">
+       select menuId from t_position_menu where poId=#{poId}
+  </select>   
+   
+  <delete id="deleteByPoId" parameterType="Integer">
+    delete from t_position_menu where poId=#{poId}
+  </delete>
+  
+  <insert id="addMenuPosition" parameterType="TPositionMenu">
+    insert into t_position_menu (menuId,poId) values (#{menuId},#{poId})
+  </insert>
+</mapper>
+

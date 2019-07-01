@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.DepartmentDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="TDepartment" id="resultDeparment">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="deptId" property="deptId"/>
+      
+      <result column="deptName" property="deptName"/>
+      <result column="deptAddress" property="deptAddress"/>
+      <result column="deptPhone" property="deptPhone"/>
+      <result column="userId" property="userId"/>
+      <result column="isDelete" property="isDelete"/>
+      
+       <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="user" javaType="TUser">
+         <id column="userId" property="userId"/>
+         
+         <result column="userName" property="userName"/>
+         <result column="userSex" property="userSex"/>
+         <result column="userBirthday" property="userBirthday"/>
+         <result column="userCard" property="userCard"/>
+     </association>
+  
+     <!-- 一对多   ofType:关联的对象
+     <collection property="positionList" ofType="TPosition">
+           <id column="poId" property="poId"/>
+           
+           <result column="poName" property="poName"/>
+           <result column="deptId" property="deptId"/>
+           <result column="poSalary" property="poSalary"/>
+           <result column="isDelete" property="isDelete"/>
+     </collection> -->
+     
+   </resultMap>
+ 
+     <!-- 查询 
+             SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.deptId=d.deptId
+     -->
+     <select id="query" resultMap="resultDeparment">
+          SELECT d.*,p.*,u.*
+		    from t_position p,t_department d,t_user u
+		       where p.deptId=d.deptId
+              and d.userId=u.userId
+     </select>
+    
+     
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="departmentCondition">
+           <where>
+		          d.userId=u.userId
+		         <if test="deptName!=null and  deptName!=''">
+				       and d.deptName like concat('%',concat(#{deptName},'%'))
+				  </if>
+				  <if test="deptPhone !=null and deptPhone!=''">
+				      and d.deptPhone like concat('%',concat(#{deptPhone},'%'))
+				  </if>
+				  <if test="deptAddress !=null and deptAddress!=''">
+				      and d.deptAddress like concat('%',concat(#{deptAddress},'%'))
+				  </if>
+		    </where>
+     </sql>
+
+   <!--resultMap:结果集      parameterType:参数类型
+    SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.deptId=d.deptId
+		  <if test="deptName!=null and  deptName!=''">
+		       and d.deptName like concat('%',concat(#{deptName},'%'))
+		  </if>
+		  <if test="deptPhone !=null and deptPhone!=''">
+		      and d.deptPhone like concat('%',concat(#{deptPhone},'%'))
+		  </if>
+		  
+		  include:包含     refid:引用的id名称-->
+    <select id="queryByCondition" resultMap="resultDeparment" parameterType="TDepartment">
+           SELECT d.*,u.*
+		    from t_department d,t_user u
+		   <include refid="departmentCondition"/>
+    </select>
+    
+    <!-- 
+     SELECT d.*,p.*
+		    from t_position p,t_department d
+         where p.deptid=d.deptid
+           and d.deptid in (1,2,3)
+           collection:集合    open：开始标签    close:结束标签      item:集合中的每个对象（变量）
+           separator:分隔符
+     -->
+    <select id="queryByIds" parameterType="Integer" resultMap="resultDeparment" >
+            SELECT d.*,p.*
+		    from t_position p,t_department d
+		    <where>
+		         p.deptid=d.deptid
+		         <if test="ids != null and ids.size>0">
+			         <foreach collection="ids" open="and d.deptid in (" close=")" item="deptId" separator="," >
+			               #{deptId}
+			         </foreach>
+		         </if>
+		    </where>
+    </select>
+    
+    <!-- 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="TDepartment">
+       select * from t_department where deptId=#{deptId}
+    </select>
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="TDepartment">
+         update t_department set
+          <if test="deptName!=null and  deptName!=''">
+             deptName=#{deptName},
+          </if>
+           <if test="deptAddress!=null and  deptAddress!=''">
+		      deptAddress=#{deptAddress},
+		  </if>
+		   <if test="deptPhone!=null and  deptPhone!=''">
+		      deptPhone=#{deptPhone}
+		  </if>
+		  where deptId=#{deptId}
+    </update>
+    
+</mapper>
+
