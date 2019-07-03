@@ -31,8 +31,10 @@ public class PositionMenuBizImpl implements PositionMenuBiz {
 		try {
 			for (Integer menuId : menuIds) {
 				TPositionMenu positionMenu = new TPositionMenu();
-				positionMenu.setMenuId(menuId);
-				positionMenu.setPoId(poId);
+				
+				positionMenu.setMenuid(menuId);
+				
+				positionMenu.setPoid(poId);
 				pmd.addMenuPosition(positionMenu);
 				
 				counts++;

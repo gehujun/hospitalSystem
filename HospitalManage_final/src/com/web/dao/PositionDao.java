@@ -6,6 +6,8 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.Map;
+
+import com.web.entity.Professionaltitle;
 import com.web.entity.TPosition;
 
 public interface PositionDao {
@@ -14,27 +16,27 @@ public interface PositionDao {
 	 * 添加
 	 * @param tposition
 	 */
-	public void addPosition(TPosition tposition);
+	public void add(Professionaltitle professionaltitle);
 	
 	/**
 	 * 修改
 	 * @param tpostion
 	 */
-	public void updatePostion(TPosition tpostion);
+	public void update(Professionaltitle professionaltitle);
 	
 	/**
 	 * 根据id查询职位信息
 	 * @param poId
 	 * @return
 	 */
-	public TPosition findByID(Integer poId);
+	public Professionaltitle findByID(Integer poId);
 	
 	/**
 	 * Map<String,Object> map
 	 * map.put("poName","医生");
 	 * @return
 	 */
-	public List<TPosition>  query();
+	public List<Professionaltitle>  query();
 	
 	
 	/**
@@ -43,18 +45,17 @@ public interface PositionDao {
 	 * map.put("poName","医生");
 	 * @return
 	 */
-	public List<TPosition>  queryByName(@Param("names") String poName);
-	
-	
-	@Delete(value="delete from t_position where poId=#{poId}")
-	public void delete(Integer poId);
+	public List<Professionaltitle>  queryByName(@Param("names") String poName);
 	
 	/**
 	 * Map<String,Object> map
 	 * map.put("poName","医生");
 	 * @return
 	 */
-	public List<TPosition>  queryByCondition(Map<String, Object> map);
+	public List<Professionaltitle>  queryByCondition(Map<String, Object> map);
+	
+	
+	public void delete(Integer profid);
 	
 	
 }

@@ -22,7 +22,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		<!-- 数据库连接池-->
 			<dataSource type="POOLED">
 				<property name="driver" value="com.mysql.jdbc.Driver" />
-				<property name="url" value="jdbc:mysql://localhost:3306/hospitalsystemdb?characterEncoding=utf-8" />
+				<property name="url" value="jdbc:mysql://localhost:3306/hospitalsystemdb?useUnicode=true&amp;characterEncoding=utf-8" />
 				<property name="username" value="root" />
 				<property name="password" value="hj770921" />
 			</dataSource>
@@ -36,6 +36,9 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		<mapper resource="com/web/mapper/PositionMapper.xml"/>
 		<mapper resource="com/web/mapper/MenuMapper.xml"/>
 		<mapper resource="com/web/mapper/PositionMenuMapper.xml"/>
+		<mapper resource="com/web/mapper/MedicalhistoryMapper.xml"/>
+		<mapper resource="com/web/mapper/PatientMapper.xml"/>
+		<mapper resource="com/web/mapper/RegistrationformMapper.xml"/>
 		
 	</mappers>
 </configuration>

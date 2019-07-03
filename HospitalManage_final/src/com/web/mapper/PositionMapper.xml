@@ -7,43 +7,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.web.dao.PositionDao">
 
    <!-- 添加 -->
-    <insert id="addPosition" parameterType="TPosition">
-        insert into t_position (poName,deptId,poSalary,isDelete)
-       values (#{poName},#{deptId},#{poSalary},#{isDelete})
-       
-         <!-- 返回自动增长后的主键   keyColumn：表中的字段名   keyProperty:类中的属性名
-          select  uuid()   resultType="String"
-           -->
-        <selectKey keyColumn="poId" keyProperty="poId" resultType="int">
-             SELECT LAST_INSERT_ID()
-        </selectKey>
-    </insert>
+    <insert id="add" parameterType="professionaltitle">
+		insert into professionaltitle (profid,profname,deptid,profbasesalary,isdelete) 
+		values (#{profid},#{profname},#{deptid},#{profbasesalary},1)
+	</insert>
     
     <!-- 修改 -->
-    <update id="updatePostion" parameterType="TPosition">
-        update t_position set poName=#{poName},deptId=#{deptId},poSalary=#{poSalary},
-        isDelete=#{isDelete} where poId=#{poId}
+     <update id="update" parameterType="Professionaltitle">
+         update professionaltitle set
+          <if test="profname!=null and  profname!=''">
+             profname=#{profname},
+          </if>
+           <if test="deptid!=null and  deptid!=''">
+		     deptid=#{deptid},
+		  </if>
+		   <if test="profbasesalary!=null and  profbasesalary!=''">
+		     profbasesalary=#{profbasesalary}
+		  </if>
+		  where profid=#{profid}
     </update>
 
    <!-- 自定义结果集 -->
-   <resultMap type="TPosition" id="resultPosition">
+   <resultMap type="professionaltitle" id="resultPosition">
        <!-- 主键 -->
-       <id column="poId" property="poId"/>
+       <id column="profid" property="profid"/>
        <!-- 其他属性 -->
-       <result column="poName" property="poName"/>
-       <result column="deptId" property="deptId"/>
-       <result column="poSalary" property="poSalary"/>
-       <result column="isDelete" property="isDelete"/>
+       <result column="profname" property="profname"/>
+       <result column="deptId" property="deptid"/>
+       <result column="profbasesalary" property="profbasesalary"/>
+       <result column="isDelete" property="isdelete"/>
        <!-- 多对一 -->
-       <association property="department" javaType="TDepartment">
+       <association property="department" javaType="Department">
              <!-- 主键 -->
-             <id column="deptId" property="deptId"/>
+             <id column="deptId" property="deptid"/>
              
-             <result column="deptName" property="deptName"/>
-             <result column="deptAddress" property="deptAddress"/>
-             <result column="deptPhone" property="deptPhone"/>
-             <result column="userId" property="userId"/>
-             <result column="isDelete" property="isDelete"/>
+             <result column="deptName" property="deptname"/>
+             <result column="deptadr" property="deptadr"/>
+             <result column="depttel" property="depttel"/>
+    
+             <result column="isDelete" property="isdelete"/>
        </association>
    </resultMap>
    <!-- 查询 -->
@@ -55,8 +57,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
    
    
    <!-- 根据职位id查询职位信息   parameterType:参数类型     resultType:结果类型-->
-   <select id="findByID" parameterType="int" resultType="TPosition">
-        select * from t_position where poId=#{poId}
+   <select id="findByID" parameterType="int" resultMap="resultPosition">
+        select * from professionaltitle where profid=#{poId}
    </select>
    
    <!-- 根据名字模糊查询   #:参数值（字符串、整数、小数等）     ${}:字符串    concat:拼接
@@ -67,14 +69,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
    
    <sql id="conditionSql">
         <if test="poName!=null and poName!=''">
-           and p.poName like concat('%',concat(#{poName},'%'))
+           and p.profname like concat('%',concat(#{poName},'%'))
         </if>
         <if test="poSalary1!=null">
            <if test="poSalary2 == null">
-             and p.poSalary >= #{poSalary1}
+             and p.profbasesalary >= #{poSalary1}
            </if>
            <if test="poSalary2!=null">
-	           and p.poSalary between #{poSalary1} and #{poSalary2}
+	           and p.profbasesalary between #{poSalary1} and #{poSalary2}
 	        </if>
         </if>
          
@@ -85,9 +87,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
    
    <!-- 根据条件查询 -->
    <select id="queryByCondition" parameterType="map" resultMap="resultPosition" >
-       SELECT p.*,d.* from t_position p,t_department d where p.deptId=d.deptId 
+       SELECT p.*,d.* from professionaltitle p,department d where p.deptId=d.deptId and p.isdelete = 1 and d.isdelete = 1
        <include refid="conditionSql"></include>
    </select>
+   
+   <update id="delete" parameterType = "Integer">
+    	update professionaltitle set isdelete = 0 where profid=#{profid}
+    </update>
+
+	
 
 </mapper>
 

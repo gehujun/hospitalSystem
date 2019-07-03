@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.web.entity.Department;
 import com.web.entity.TDepartment;
 
 /**
@@ -23,7 +24,7 @@ public interface DepartmentDao {
 	 * 根据条件查询
 	 * @return
 	 */
-	public List<TDepartment> queryByCondition(TDepartment department);
+	public List<Department> queryByCondition(Department department);
 	
 	
 	/**
@@ -38,7 +39,7 @@ public interface DepartmentDao {
 	 * @param deptId
 	 * @return
 	 */
-	public TDepartment findById(@Param("deptId") Integer deptId);
+	public Department findById(@Param("deptId") Integer deptId);
 	
 	
 	/**
@@ -46,5 +47,13 @@ public interface DepartmentDao {
 	 * @param department
 	 */
 	public void update(TDepartment department);
+	
+	public void deleteById(Department department);
+	
+	public void addDepartment(Department department);
+	
+	public void updateDepartment(Department department);
+	
+	
 	
 }

@@ -1,8 +1,11 @@
 package com.web.controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,9 +23,12 @@ import com.web.biz.impl.MenuBizImpl;
 import com.web.biz.impl.PositionMenuBizImpl;
 import com.web.biz.impl.UserBizImpl;
 import com.web.entity.Employee;
+import com.web.entity.Professionaltitle;
 import com.web.entity.TMenu;
 import com.web.entity.TUser;
 import com.web.pojo.MenuPojo;
+import com.web.util.JsonUtil;
+import com.web.util.StringUtil;
 
 @WebServlet(urlPatterns="/user")
 public class UserController extends HttpServlet {
@@ -86,15 +92,141 @@ public class UserController extends HttpServlet {
 					
 				}else{
 					//用户名和密码输入错误
-					req.getRequestDispatcher("gentelella/docslogin.jsp").forward(req, resp);
+					req.getRequestDispatcher("gentelella/docs/login.jsp").forward(req, resp);
 				}
 				
 			}else{
 				//验证码输入错误
-				req.getRequestDispatcher("gentelella/docslogin.jsp").forward(req, resp);
+				req.getRequestDispatcher("gentelella/docs/login.jsp").forward(req, resp);
+			}
+		}else if(method.equals("query")){
+			
+			Map<String, Object> map = new HashMap<>();
+			
+			String empName = req.getParameter("empName");
+			if(StringUtil.isStringEmpty(empName)){
+				map.put("empName", empName);
 			}
 			
+			String profName = req.getParameter("profName");
+			if(StringUtil.isStringEmpty(profName)){
+				if(!profName.equals("0"))
+					map.put("profName", profName);
+			}
+			
+			List<Employee> empList = ub.queryByCondition(map);
+			
+			 //把数据转换为json字符串
+			  String json = JsonUtil.getJson(empList);
+			  System.out.println(json);
+			  
+			  //获取输出对象
+			  PrintWriter out = resp.getWriter();
+			  resp.setContentType("UTF-8");//把json数据的编码格式设置为UTF-8
+			  out.write(json);//输出
+			  out.flush();//刷新
+			  out.close();//关闭
+		}else if ("delete".equals(method)) {
+			//删除
+			String empid = req.getParameter("empid");
+			System.out.println(empid);
+			
+			//调用业务逻辑层的查询方法
+			boolean flag =  ub.delete(Integer.parseInt(empid));
+			System.out.println(flag);
+			
+			String json = JsonUtil.getJson(flag);
+			
+			//获取输出对象
+			PrintWriter out = resp.getWriter();
+			resp.setContentType("UTF-8");
+			out.write(json);//输出
+			out.flush();//刷新
+			out.close();//关闭
+		}else if(method.equals("add")){
+			System.out.println("add");
+			String empName = req.getParameter("empName");
+			String empSex = req.getParameter("empSex");
+			String empProfId = req.getParameter("empProf");
+			String empPwd = req.getParameter("empPwd");
+			
+			Employee employee = new Employee();
+			
+			if(StringUtil.isStringEmpty(empName)){
+				employee.setEmpname(empName);
+			}
+			if(StringUtil.isStringEmpty(empSex)){
+				employee.setEmpsex(empSex);
+			}
+			if(StringUtil.isStringEmpty(empProfId)){
+				employee.setProfid(Integer.parseInt(empProfId));
+			}
+			
+			if(StringUtil.isStringEmpty(empPwd)){
+				employee.setPassword(empPwd);
+			}
+			
+			boolean flag =  ub.add(employee);
+			System.out.println(flag);
+			
+			String json = JsonUtil.getJson(flag); 
+			//获取输出对象
+			PrintWriter out = resp.getWriter();
+			resp.setContentType("UTF-8");
+			out.write(json);//输出
+			out.flush();//刷新
+			out.close();//关闭
+		}else if(method.equals("sendUpdate")){
+			
+			String empId = req.getParameter("empid");
+			Employee employee = new Employee();
+			if(StringUtil.isStringEmpty(empId))
+				employee = ub.findByID(Integer.parseInt(empId));
+			
+			//把数据转换为json字符串
+			  String json = JsonUtil.getJson(employee);
+			  
+			  //获取输出对象
+			  PrintWriter out = resp.getWriter();
+			  resp.setContentType("UTF-8");//把json数据的编码格式设置为UTF-8
+			  out.write(json);//输出
+			  out.flush();//刷新
+			  out.close();//关闭
+		}else if(method.equals("update")){
+			System.out.println("update");
+			String empId = req.getParameter("empId");
+			String empName = req.getParameter("empName");
+			String empSex = req.getParameter("empSex");
+			String empProfId = req.getParameter("empProf");
+			
+			Employee employee = new Employee();
+			
+			if(StringUtil.isStringEmpty(empName)){
+				employee.setEmpname(empName);
+			}
+			if(StringUtil.isStringEmpty(empSex)){
+				employee.setEmpsex(empSex);
+			}
+			if(StringUtil.isStringEmpty(empProfId)){
+				employee.setProfid(Integer.parseInt(empProfId));
+			}
+			if(StringUtil.isStringEmpty(empId)){
+				employee.setEmpid(Integer.parseInt(empId));
+			}
+			boolean flag =  ub.update(employee);
+			 
+			 System.out.println(flag);
+			 
+			 //获取输出对象
+			  PrintWriter out = resp.getWriter();
+			  resp.setContentType("UTF-8");//把json数据的编码格式设置为UTF-8
+			  out.write(flag ? "1" : "0");//输出
+			  out.flush();//刷新
+			  out.close();//关闭
+			
 		}
+		
+		
 		
 	}
 	

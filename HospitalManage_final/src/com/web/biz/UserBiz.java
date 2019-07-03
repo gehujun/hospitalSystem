@@ -1,5 +1,8 @@
 package com.web.biz;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.web.entity.Employee;
@@ -15,4 +18,13 @@ public interface UserBiz {
 	 */
 	public Employee login(@Param("userName") String userName,@Param("userPwd") String userPwd);
 
+	public List<Employee> queryByCondition(Map<String, Object> map);
+	
+	public boolean delete(Integer profid);
+	
+	public boolean add(Employee employee);
+	
+	public Employee findByID(Integer empid);
+	
+	public boolean update(Employee employee);
 }
