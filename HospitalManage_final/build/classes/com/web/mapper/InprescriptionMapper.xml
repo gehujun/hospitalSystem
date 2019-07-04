@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namesapce 命名空间 -->
+
+<mapper namespace="com.web.dao.InprescriptionDao">
+
+	<resultMap type="Inprescription" id="resInprescription">
+		<id column="mediid" property="mediid"/>
+		<id column="maid" property="maid"/>
+			<result column="medicinenum" property="medicinenum"/>
+			
+		<association property="medi" javaType="Medicine">
+			<id column="mediid" property="mediid"/>
+			<result column="mediname" property="mediname"/>
+		</association>
+	</resultMap>
+	
+  <!-- 查询 -->
+  	 <select id="query" resultMap="resInprescription">
+        SELECT *         from inprescription i,medicine m,medicaladvice ma               
+          WHERE i.mediid=m.mediid and i.maid=ma.maid and i.isDelete!=0
+				
+     </select>
+     
+     
+	<select id="queryByCondition" parameterType="map" resultMap="resInprescription">
+        SELECT *
+        from inprescription i,medicine m,medicaladvice ma
+		<include refid="Condition"></include>
+   		
+   </select>
+  
+     
+      <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="Condition">
+           <where>
+		        i.mediid=m.mediid and i.maid=ma.maid and i.isDelete!=0
+		         <if test="maid !=null and  maid !=''">
+				        and i.maid=#{maid} 
+				  </if>
+				<if test="mediid !=null and mediid!=''">
+				       and m.mediname like concat('%',concat(#{mediid},'%'))
+				     
+				  </if>
+		    </where>
+     </sql>
+     
+    
+     <!-- 删除语句 -->
+     <delete id="delete" >
+         update Inprescription set isdelete=0       
+		 	  where mediid=#{mediid} and maid=#{maid}
+    </delete>
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="Inprescription">
+         update Inprescription set
+		  
+		      medicinenum=#{medicinenum}
+		  
+		  where mediid=#{mediid} and maid=#{maid}
+    </update>
+    
+    <!-- 通过ID查找 -->
+    <!-- 根据id查询对象 -->
+    <select id="findById" resultMap="resInprescription">
+       select * 
+       		from inprescription i
+       		where i.mediid=#{mediid} and i.maid=#{maid}
+    </select>
+    
+    <insert id="add" parameterType="Inprescription">
+		insert into Inprescription (mediid,maid,medicineNum,isdelete)
+		values (#{mediid},#{maid},#{medicinenum},1)
+	</insert>
+	
+	<select id="maidSelect" resultType = "Medicaladvice">
+		select * from medicaladvice
+	</select>
+	
+	<select id="mediidSelect" resultType = "Medicine">
+		select * from Medicine
+	</select>
+    
+</mapper>
+
+
