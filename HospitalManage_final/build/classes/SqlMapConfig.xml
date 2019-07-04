@@ -20,11 +20,11 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		<!-- 使用jdbc事务管理-->
 			<transactionManager type="JDBC" />
 		<!-- 数据库连接池-->
-			<dataSource type="POOLED">
+			<dataSource type="POOLED"><!-- mysql://192.168.43.238:3306/hospitalsystemdb?useUnicode=true&amp;characterEncoding=utf-8 -->
 				<property name="driver" value="com.mysql.jdbc.Driver" />
-				<property name="url" value="jdbc:mysql://localhost:3306/hospitalsystemdb?characterEncoding=utf-8" />
+				<property name="url" value="jdbc:mysql://localhost:3306/hospitalsystemdb?useUnicode=true&amp;characterEncoding=utf-8" />
 				<property name="username" value="root" />
-				<property name="password" value="hj770921" />
+				<property name="password" value="Qinyibut@foxmail" />
 			</dataSource>
 		</environment>
 	</environments>
@@ -36,6 +36,15 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		<mapper resource="com/web/mapper/PositionMapper.xml"/>
 		<mapper resource="com/web/mapper/MenuMapper.xml"/>
 		<mapper resource="com/web/mapper/PositionMenuMapper.xml"/>
-		
+		<mapper resource="com/web/mapper/MedicalhistoryMapper.xml"/>
+		<mapper resource="com/web/mapper/PatientMapper.xml"/>
+		<mapper resource="com/web/mapper/RegistrationformMapper.xml"/>
+		<mapper resource="com/web/mapper/InpatientMapper.xml"/>
+		<mapper resource="com/web/mapper/bedMapper.xml"/>
+		<mapper resource="com/web/mapper/medicalAdviceMapper.xml"/>
+		<mapper resource="com/web/mapper/employeeMapper.xml"/>
+        <mapper resource="com/web/mapper/surgeryRoomMapper.xml"/>
+        <mapper resource="com/web/mapper/MedicinepayreceiptMapper.xml"/>
+        <mapper resource="com/web/mapper/wardMapper.xml"/>
 	</mappers>
 </configuration>

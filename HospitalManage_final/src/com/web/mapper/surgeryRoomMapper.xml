@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.surgeryRoomDao">
+	<!-- <insert id=""></insert> -->
+	<resultMap type = "Surgerroom" id = "resultSurgerroom">
+		<id column = "surroomid" property = "surroomid"/>
+		
+		<result column="surroomaddr" property="surroomaddr"/>
+		<result column="surroompre" property="surroompre"/>
+		<result column="empid" property="empid"/>
+		<association property = "emp" javaType = "Employee">
+			<id column = "empid" property = "empid"/>
+			
+			<result column="empname" property="empname"/>
+			<result column="empsex" property="empsex"/>
+			<result column="empage" property="empage"/>
+			<result column="emptel" property="emptel"/>
+			
+		</association>
+	</resultMap>
+	
+	<select id="query" resultMap = "resultSurgerroom" parameterType = "Surgerroom">
+		select s.*, e.* from Surgerroom s, employee e
+			where s.isDelete != 0 and s.empid = e.empid
+			<if test="surroomid != null and surroomid != ''">
+				and s.surroomid = #{surroomid}
+			</if>
+			<if test="surroomaddr != null and surroomaddr != ''">
+				and s.surroomaddr like concat('%', concat(#{surroomaddr}, '%')) 
+			</if>
+			<if test="empid != null and empid != ''">
+				and s.empid = #{empid}
+			</if>
+	</select>
+	
+	<insert id="add" parameterType = "Surgerroom">
+		insert into Surgerroom(surroomid, surroomaddr, empid, surroompre, isDelete) values(#{surroomid}, 
+			#{surroomaddr}, #{empid}, #{surroompre}, #{isdelete})
+	</insert>
+	
+	<select id="findById" resultMap = "resultSurgerroom" parameterType = "String">
+		select s.*, e.* from Surgerroom s, employee e
+			where s.isDelete != 0 and s.empid = e.empid and s.surroomid = #{surroomid}
+	</select>
+	
+	<update id="update" parameterType = "Surgerroom">
+		update Surgerroom set
+		<if test="surroomaddr != null and surroomaddr != ''">
+			surroomaddr = #{surroomaddr},
+		</if>
+		<if test="empid != null and empid != ''">
+			empid = #{empid},
+		</if>
+		<if test="surroompre != null and surroompre !=''">
+			surroompre = #{surroompre}
+		</if>
+		where surroomid = #{surroomid}
+	</update>
+	
+	<delete id="delete" parameterType = "String">
+		update Surgerroom set isDelete = 0 where surroomid = #{surroomid}
+	</delete>
+</mapper>

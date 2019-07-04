@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.wardDao">
+	<resultMap type="Ward" id="resultWard">
+		<id column = "wardname" property = "wardname"/>
+		
+		<result column="bednum" property="bednum"/>
+		<result column="empid" property="empid"/>
+		<result column="emptybednum" property="emptybednum"/>
+		
+		<association property = "emp" javaType = "Employee">
+			<id column = "empid" property = "empid"/>
+			<result column="empname" property="empname"/>
+			
+		</association>
+	</resultMap>
+	<select id="query" parameterType = "Ward" resultMap = "resultWard">
+		select w.*, e.* from Ward w, Employee e where w.empid = e.empid and w.isDelete != 0
+		<if test="wardname != null and wardname != ''">
+			and w.wardname like concat('%', concat(#{wardname}, '%'))
+		</if>
+		<if test="empid != null and empid != ''">
+			and w.empid = #{empid}
+		</if>
+	</select>
+	
+	<insert id="add" parameterType = "Ward">
+		insert into Ward(wardname, bednum, empid, emptybednum, isDelete)
+		values (#{wardname},#{bednum},#{empid},#{emptybednum},#{isdelete})
+	</insert>
+	
+	<select id="findById" parameterType = "String" resultMap = "resultWard">
+		select w.*, e.* from Ward w, Employee e where w.wardname = #{wardname} and w.isDelete != 0
+			and w.empid = e.empid
+	</select>
+	
+	<update id="update" parameterType = "Medicinepayreceipt">
+		update Ward set
+		<if test="empid != null and empid != ''">
+			empid = #{empid},
+		</if>
+		<if test="bednum != null and bednum != ''">
+			bednum = #{bednum},
+		</if>
+		<if test="emptybednum != null and emptybednum != ''">
+			emptybednum = #{emptybednum}
+		</if>
+		where wardname = #{wardname}
+	</update>
+	
+	<delete id="delete" parameterType = "String">
+		update Ward set isDelete = 0 where wardname = #{wardname}
+	</delete>
+</mapper>

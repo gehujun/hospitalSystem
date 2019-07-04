@@ -10,10 +10,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.el.lang.ELSupport;
+
 import com.web.biz.DepartmentBiz;
 import com.web.biz.impl.DepartmentBizImpl;
+import com.web.entity.Department;
 import com.web.entity.TDepartment;
 import com.web.util.JsonUtil;
+import com.web.util.StringUtil;
 
 /**
  * 科室的控制层
@@ -44,16 +48,18 @@ public class DepartmentController extends HttpServlet {
 			  
 			  //接收前台传过来的参数
 			  String deptName = req.getParameter("deptName");
-			  String deptAddress = req.getParameter("deptAddress");
+			  String deptId = req.getParameter("deptId");
 			  String deptPhone = req.getParameter("deptPhone");
 			  
-			  TDepartment department = new TDepartment();
-			  department.setDeptName(deptName);
-			  department.setDeptAddress(deptAddress);
-			  department.setDeptPhone(deptPhone);
+			  Department department = new Department();
+			  department.setDeptname(deptName);
+			  if(StringUtil.isStringEmpty(deptId))
+				  department.setDeptid(Integer.parseInt(deptId));
+			  if(StringUtil.isStringEmpty(deptPhone))
+				  department.setDepttel(Integer.parseInt(deptPhone));
 			  
 			  //调用业务逻辑层中的查询方法
-			  List<TDepartment> list = db.queryByCondition(department);
+			  List<Department> list = db.queryByCondition(department);
 			  
 //			  //把数据传到页面上
 //			  req.setAttribute("list", list);
@@ -76,7 +82,7 @@ public class DepartmentController extends HttpServlet {
 			  String deptId = req.getParameter("deptId");
 			  
 			  //调用业务逻辑层的查询方法
-			  TDepartment department =  db.findById(Integer.parseInt(deptId));
+			  Department department =  db.findById(Integer.parseInt(deptId));
 			  
 			  //把数据转换为json字符串
 			  String json = JsonUtil.getJson(department);
@@ -95,16 +101,17 @@ public class DepartmentController extends HttpServlet {
 			  String deptPhone = req.getParameter("deptPhone");
 			  String userId = req.getParameter("userId");
 			  
-			  TDepartment department = new TDepartment();
-			  department.setDeptAddress(deptAddress);
-			  department.setDeptId(Integer.parseInt(deptId));
-			  department.setDeptName(deptName);
-			  department.setDeptPhone(deptPhone);
-			  department.setIsDelete(0);
-			  department.setUserId(Integer.parseInt(userId));
+			  Department department = new Department();
+			  
+			  department.setDeptid(Integer.parseInt(deptId));
+			  department.setDeptname(deptName);
+			  department.setDeptadr(deptAddress);
+			  department.setDepttel(Integer.parseInt(deptPhone));
+			  
+			  
 			  
 			  //调用业务逻辑层的修改方法
-			 boolean flag =  db.update(department);
+			 boolean flag =  db.updateDepartment(department);
 			 
 			 System.out.println(flag);
 			 
@@ -114,7 +121,67 @@ public class DepartmentController extends HttpServlet {
 			  out.write(flag ? "1" : "0");//输出
 			  out.flush();//刷新
 			  out.close();//关闭
-		  }
+		  }else if(method.equals("delete")){
+			  String deptId = req.getParameter("deptId");
+				
+			  Department department = new Department();
+			  department.setDeptid(Integer.parseInt(deptId));
+			  
+			  boolean flag = db.deleteById(department);
+			
+			  System.out.println("delete result: "+flag);
+				 
+			  //获取输出对象
+			  PrintWriter out = resp.getWriter();
+			  resp.setContentType("UTF-8");//把json数据的编码格式设置为UTF-8
+			  out.write(flag ? "1" : "0");//输出
+			  out.flush();//刷新
+			  out.close();//关闭
+		  }else if(method.equals("add")){
+				
+				String deptName = req.getParameter("deptName");
+				String deptAddress = req.getParameter("deptAddress");
+				String deptPhone = req.getParameter("deptPhone");
+				
+				Department department = new Department();
+				
+				department.setDeptname(deptName);
+				department.setDeptadr(deptAddress);
+				if(StringUtil.isStringEmpty(deptPhone));
+					department.setDepttel(Integer.parseInt(deptPhone));
+				
+				
+				boolean flag = db.addDepartment(department);
+				
+				
+				System.out.println("add result: "+flag);
+				 
+				 //获取输出对象
+				  PrintWriter out = resp.getWriter();
+				  resp.setContentType("UTF-8");//把json数据的编码格式设置为UTF-8
+				  out.write(flag ? "1" : "0");//输出
+				  out.flush();//刷新
+				  out.close();//关闭
+			} else if ("deptIdSelect".equals(method)) {
+				String deptId = req.getParameter("deptId");
+				String deptName = req.getParameter("deptName");
+				
+				Department department = new Department();
+				if (deptId != null && deptId != "") {
+					department.setDeptid(Integer.parseInt(deptId));
+				}
+//				department.setDeptId(Integer.parseInt(deptId));
+				department.setDeptname(deptName);
+				
+				List<Department> list = db.deptIdSelect();
+				String json = JsonUtil.getJson(list);
+				System.out.println(json);
+				PrintWriter out = resp.getWriter();
+				resp.setContentType("UTF-8");
+				out.write(json);
+				out.flush();
+				out.close();
+			}
 		  
 		  
 	}

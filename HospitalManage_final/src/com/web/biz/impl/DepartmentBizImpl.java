@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSession;
 
 import com.web.biz.DepartmentBiz;
 import com.web.dao.DepartmentDao;
+import com.web.entity.Department;
 import com.web.entity.TDepartment;
 import com.web.util.MyBatisUtil;
 
@@ -23,33 +24,63 @@ public class DepartmentBizImpl implements DepartmentBiz {
 	 * 根据条件查询
 	 */
 	@Override
-	public List<TDepartment> queryByCondition(TDepartment department) {
+	public List<Department> queryByCondition(Department department) {
 		
-		List<TDepartment> list = dd.queryByCondition(department);
+		List<Department> list = dd.queryByCondition(department);
 		
 		return list;
 	}
 
-	public TDepartment findById(Integer deptId) {
+	public Department findById(Integer deptId) {
 		return dd.findById(deptId);
 	}
-
+	
 	@Override
-	public boolean update(TDepartment department) {
-		
+	public boolean deleteById(Department department) {
+		// TODO Auto-generated method stub
 		try {
-			dd.update(department);
-			
-			sqlSession.commit();//提交
-			
+			dd.deleteById(department);
+			sqlSession.commit();
 			return true;
 		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean addDepartment(Department department) {
+	// TODO Auto-generated method stub
+		try {
+			dd.addDepartment(department);
+			sqlSession.commit();
+			return true;
+		} catch (Exception e) {
+			// TODO: handle exception
 			e.printStackTrace();
 			return false;
 		}
 	}
 
+	@Override
+	public boolean updateDepartment(Department department) {
+	// TODO Auto-generated method stub
+		
+		try {
+			dd.updateDepartment(department);
+			sqlSession.commit();
+			return true;
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			return false;
+		}
+	}
 	
-	
-	
+	@Override
+	public List<Department> deptIdSelect() {
+		// TODO Auto-generated method stub
+		return dd.deptIdSelect();
+	}
 }

@@ -16,7 +16,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   </delete>
   
   <insert id="addMenuPosition" parameterType="TPositionMenu">
-    insert into t_position_menu (menuId,poId) values (#{menuId},#{poId})
+    insert into t_position_menu (menuId,poId) values (#{menuid},#{poid})
   </insert>
+  
+  
+  
 </mapper>
 

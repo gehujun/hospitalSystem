@@ -1,8 +1,12 @@
 package com.web.dao;
 
+import java.util.List;
+import java.util.Map;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.web.entity.Employee;
+import com.web.entity.Professionaltitle;
 import com.web.entity.TUser;
 
 public interface UserDao {
@@ -14,4 +18,11 @@ public interface UserDao {
 	 * @return
 	 */
 	public Employee login(@Param("userName") String userName,@Param("userPwd") String userPwd);
+
+	public List<Employee> queryByCondition(Map<String, Object> map);
+	
+	public void delete(Integer profid);
+	
+	public void add(Employee employee);
+	
 }

@@ -2,6 +2,7 @@ package com.web.controller;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.web.biz.PositionMenuBiz;
 import com.web.biz.impl.MenuBizImpl;
 import com.web.biz.impl.PositionBizImpl;
 import com.web.biz.impl.PositionMenuBizImpl;
+import com.web.entity.Professionaltitle;
 import com.web.entity.TMenu;
 import com.web.entity.TPosition;
 import com.web.pojo.MenuPojo;
@@ -71,7 +73,7 @@ public class PositionController extends HttpServlet {
 				}
 			}
 			
-			List<TPosition> list = pb.queryByCondition(map);
+			List<Professionaltitle> list = pb.queryByCondition(map);
 			
 			 //把数据转换为json字符串
 			  String json = JsonUtil.getJson(list);
@@ -125,7 +127,118 @@ public class PositionController extends HttpServlet {
 			 out.write(flag ? "1" : "0");//输出
 			 out.flush();//刷新
 			 out.close();//关闭
-		}
+		}else if ("delete".equals(method)) {
+			//删除
+			String profid = req.getParameter("profid");
+			System.out.println(profid);
+			
+			//调用业务逻辑层的查询方法
+			boolean flag =  pb.delete(Integer.parseInt(profid));
+			System.out.println(flag);
+			
+			String json = JsonUtil.getJson(flag);
+			
+			//获取输出对象
+			PrintWriter out = resp.getWriter();
+			resp.setContentType("UTF-8");
+			out.write(json);//输出
+			out.flush();//刷新
+			out.close();//关闭
+		}else if ("add".equals(method)) {
+			String profid = req.getParameter("profid");
+			String profname = req.getParameter("profname");
+			String deptid = req.getParameter("deptid");
+		    String s_profbasesalary = req.getParameter("profbasesalary");
+			  
+			Professionaltitle professionaltitle=new Professionaltitle();
+			if(StringUtil.isStringEmpty(profid)){
+				professionaltitle.setProfid(Integer.parseInt(profid));
+			}
+			professionaltitle.setProfname(profname);
+			if(StringUtil.isStringEmpty(deptid)){
+				professionaltitle.setDeptid(Integer.parseInt(deptid));
+			}
+			BigDecimal profbasesalary =new BigDecimal("0.0");
+			if(StringUtil.isStringEmpty(s_profbasesalary)){
+				profbasesalary = BigDecimal.valueOf(Double.parseDouble(s_profbasesalary));
+			}
+				 
+			profbasesalary.setScale(0, BigDecimal.ROUND_HALF_UP);
+			  
+			if(profbasesalary!=null){
+				
+				professionaltitle.setProfbasesalary(Long.parseLong(s_profbasesalary));
+				
+			}
+			professionaltitle.setIsdelete(1);
+			
+			//调用业务逻辑层的查询方法
+			boolean flag =  pb.add(professionaltitle);
+			System.out.println(flag);
+			
+			String json = JsonUtil.getJson(flag); 
+			//获取输出对象
+			PrintWriter out = resp.getWriter();
+			resp.setContentType("UTF-8");
+			out.write(json);//输出
+			out.flush();//刷新
+			out.close();//关闭
+			
+		}else if("sendUpdate".equals(method)){
+			  //跳转到修改页面  （需要根据主键从数据库中查询原来的数据信息)
+			  String profid = req.getParameter("profid");
+			  
+			  //调用业务逻辑层的查询方法
+			  Professionaltitle professionaltitle=pb.findById(Integer.parseInt(profid));
+			  
+			  //把数据转换为json字符串
+			  String json = JsonUtil.getJson(professionaltitle);
+			  
+			  //获取输出对象
+			  PrintWriter out = resp.getWriter();
+			  resp.setContentType("UTF-8");//把json数据的编码格式设置为UTF-8
+			  out.write(json);//输出
+			  out.flush();//刷新
+			  out.close();//关闭
+		  }else if("update".equals(method)){
+			  //修改
+			  String profid = req.getParameter("profid");
+			  String profname = req.getParameter("profname");
+			  String deptid = req.getParameter("deptname");
+			  String s_profbasesalary = req.getParameter("profbasesalary");
+			  
+			  Professionaltitle professionaltitle = new Professionaltitle();
+			  if (profid!=null && profid!="") {
+				  professionaltitle.setProfid(Integer.parseInt(profid));
+			  }
+			  professionaltitle.setProfname(profname);
+			  if (deptid!=null && deptid!="") {
+				  professionaltitle.setDeptid(Integer.parseInt(deptid));
+			  }
+			  
+			  BigDecimal profbasesalary =new BigDecimal("0.0");
+			  if(StringUtil.isStringEmpty(s_profbasesalary)){
+					 profbasesalary = BigDecimal.valueOf(Double.parseDouble(s_profbasesalary));
+				  }
+				 
+			  profbasesalary.setScale(0, BigDecimal.ROUND_HALF_UP);
+			  
+			  if(profbasesalary!=null){
+				  professionaltitle.setProfbasesalary(Long.parseLong(s_profbasesalary));
+			  }
+			  
+			  //调用业务逻辑层的修改方法
+			 boolean flag =  pb.update(professionaltitle);
+			 
+			 System.out.println(flag);
+			 
+			 //获取输出对象
+			  PrintWriter out = resp.getWriter();
+			  resp.setContentType("UTF-8");//把json数据的编码格式设置为UTF-8
+			  out.write(flag ? "1" : "0");//输出
+			  out.flush();//刷新
+			  out.close();//关闭
+		  }
 	}
 	
 	/**
