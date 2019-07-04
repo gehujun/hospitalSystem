@@ -15,7 +15,21 @@
   .b{
      display: none;//隐藏
   }
+  
+  .modal-dialog .modal-content .modal-body{
+  	height:auto;
+  }
+  
 </style>
+
+<script type="text/javascript">
+var maxModalHeight = document.documentElement.clienceHeight - 170 + 'px';
+$("#maxModalHeight").css({
+               'max-height': 'maxModalHeight',
+               'overflow' : 'auto'
+  });
+</script>
+
 </head>
 <body>
 
@@ -424,7 +438,7 @@ $(function(){
 					    </div>
 				 </div>
 				 <div class="form-group">
-					    <label for="inputEmail3" class="col-sm-2 control-label">挂单处理人:</label>
+					    <label for="inputEmail3" class="col-sm-2 control-label">处理人:</label>
 					    <div class="col-sm-10">
 						    <select class="form-control" name="empName" id="empNameUpdate">
 						      	<option value="0">请选择</option>
@@ -454,14 +468,14 @@ $(function(){
 <form id="myAddForm" method="post">
 
 <input type="hidden" name="regId" id="regIdAdd">
-<div class="modal fade" id="myAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade"  id="myAddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 <h4 class="modal-title" id="myModalLabel">增加挂单</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body maxModalHeight" style="overflow : auto ">
                    <div class="form-group">
 					    <label for="inputEmail3" class="col-sm-2 control-label">挂单病人:</label>
 					    <div class="col-sm-10">
@@ -491,7 +505,7 @@ $(function(){
 					    </div>
 				 </div>
 				 <div class="form-group">
-					    <label for="inputEmail3" class="col-sm-2 control-label">挂单处理人:</label>
+					    <label for="inputEmail3" class="col-sm-2 control-label">处理人:</label>
 					    <div class="col-sm-10">
 						    <select class="form-control" name="empName" id="empNameAdd">
 						      	<option value="0">请选择</option>

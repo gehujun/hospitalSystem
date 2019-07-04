@@ -39,6 +39,9 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		<mapper resource="com/web/mapper/MedicalhistoryMapper.xml"/>
 		<mapper resource="com/web/mapper/PatientMapper.xml"/>
 		<mapper resource="com/web/mapper/RegistrationformMapper.xml"/>
-		
+		<mapper resource="com/web/mapper/SurgeryprojectMapper.xml"/>
+		<mapper resource="com/web/mapper/BedMapper.xml"/>
+		<mapper resource="com/web/mapper/InprescriptionMapper.xml"/>
+		<mapper resource="com/web/mapper/DutytableMapper.xml"/>
 	</mappers>
 </configuration>

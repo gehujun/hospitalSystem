@@ -44,7 +44,6 @@
 			  </div>
 			  <button id="btn_query" type="button" class="btn btn-success">查询</button>
 			  <button id="btn_add" type="button" class="btn btn-success" >添加职称</button>
-			  
 		 </form>
    </div>
    <button id="open" class="btn btn-success">展开或折叠</button>
@@ -127,7 +126,6 @@
                 }  
               
             } 
-            
         }); 
     	
     })
@@ -273,7 +271,7 @@
 	              
 	            }
 			})
-			//医生也应该一样，但是没有employee的controller，直接在后台写死的
+			
 						
 			
 		})
@@ -496,9 +494,6 @@ $('#btnAdd').click(function(){
 $("#btnUpadte").click(function(){
 		  
 		    //获取表单中的数据
-		    
-		    
-		    
 		     var professionaltitle = $("#myUpdateForm").serializeArray();
 		    
 		    $.ajax({
