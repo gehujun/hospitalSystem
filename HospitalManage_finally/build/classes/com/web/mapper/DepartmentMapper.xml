@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.DepartmentDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Department" id="resultDeparment">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="deptId" property="deptid"/>
+      
+      <result column="deptName" property="deptname"/>
+      <result column="deptadr" property="deptadr"/>
+      <result column="depttel" property="depttel"/>
+      <result column="isDelete" property="isdelete"/>
+      
+   </resultMap>
+ 
+     <!-- 查询 
+             SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.deptId=d.deptId
+     -->
+     <select id="query" resultMap="resultDeparment">
+          SELECT d.*,p.*,u.*
+		    from t_position p,t_department d,t_user u
+		       where p.deptId=d.deptId
+              and d.userId=u.userId
+     </select>
+    
+     
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="departmentCondition">
+           <where>
+		          d.isdelete = 1
+		         <if test="deptname!=null and  deptname!=''">
+				       and d.deptName like concat('%',concat(#{deptname},'%'))
+				  </if>
+				  <if test="deptid !=null and deptid!=''">
+				      and d.deptid =#{deptid}
+				  </if>
+				  
+		    </where>
+     </sql>
+
+    <select id="queryByCondition" resultMap="resultDeparment" parameterType="Department">
+           SELECT d.*
+		    from department d
+		   <include refid="departmentCondition"/>
+    </select>
+    
+    <update id="deleteById" parameterType="Department">
+		update department set isDelete = 0 where deptId = #{deptid}
+	</update>
+    
+    <!-- 
+     SELECT d.*,p.*
+		    from t_position p,t_department d
+         where p.deptid=d.deptid
+           and d.deptid in (1,2,3)
+           collection:集合    open：开始标签    close:结束标签      item:集合中的每个对象（变量）
+           separator:分隔符
+     -->
+    <select id="queryByIds" parameterType="Integer" resultMap="resultDeparment" >
+            SELECT d.*,p.*
+		    from t_position p,t_department d
+		    <where>
+		         p.deptid=d.deptid
+		         <if test="ids != null and ids.size>0">
+			         <foreach collection="ids" open="and d.deptid in (" close=")" item="deptId" separator="," >
+			               #{deptId}
+			         </foreach>
+		         </if>
+		    </where>
+    </select>
+    
+    <!-- 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="Department">
+       select * from department where deptId=#{deptId}
+    </select>
+    
+    <!-- 修改 -->
+    <update id="updateDepartment" parameterType="Department">
+         update department 
+         set deptname = #{deptname}, deptadr=#{deptadr},depttel=#{depttel}
+		 where deptid=#{deptid}
+    </update>
+    
+    <insert id="addDepartment" parameterType="Department">
+		insert into department (deptname,deptadr,depttel,isdelete) 
+		values (#{deptname},#{deptadr},#{depttel},1)
+		<!-- 自动增长后的主键   -->
+         <selectKey keyColumn="deptid" keyProperty="deptid" resultType="int">
+         	SELECT LAST_INSERT_id()
+         </selectKey>
+	</insert>
+    
+</mapper>
+

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.medicinepayreceiptDao">
+	<resultMap type="Medicinepayreceipt" id="resultMedicinepayreceipt">
+		<id column = "mprid" property = "mprid"/>
+		
+		<result column="maid" property="maid"/>
+		<result column="mprcontent" property="mprcontent"/>
+		<result column="inpatid" property="inpatid"/>
+		<result column="mprdate" property="mprdate"/>
+		<result column="empid" property="empid"/>
+		<result column="amount" property="amount"/>
+		
+		<association property = "inp" javaType = "Inpatient">
+			<id column = "inpatid" property = "inpatid"/>
+			
+			<result column="patid" property="patid"/>
+			
+		</association>
+		
+		<association property = "med" javaType = "medicalAdvice">
+			<id column = "maid" property = "maid"/>
+			<result column="diseasename" property="diseasename"/>
+			
+		</association>
+		
+		<association property = "pat" javaType = "Patient">
+			<id column = "patid" property = "patid"/>
+			<result column="patname" property="patname"/>
+			
+		</association>
+		
+		<association property = "emp" javaType = "Employee">
+			<id column = "empid" property = "empid"/>
+			<result column="empname" property="empname"/>
+			
+		</association>
+		
+	</resultMap>
+	<select id="query" parameterType = "Medicinepayreceipt" resultMap = "resultMedicinepayreceipt">
+		select mpr.*, ip.*, p.*, ma.*, e.* from medicinePayReceipt mpr, Inpatient ip, patient p,
+		medicalAdvice ma, employee e 
+		where mpr.maid = ma.maid and mpr.inpatid = ip.inpatid and ip.patid = p.patid and mpr.empid = e.empid
+		and mpr.isDelete != 0
+		<if test="mprid != null and mprid != ''">
+			and mpr.mprid = #{mprid}
+		</if>
+		<if test="mprcontent != null and mprcontent != ''">
+			and mpr.mprcontent like concat('%', concat(#{mprcontent}, '%'))
+		</if>
+		<if test="empid != null and empid != ''">
+			and mpr.empid = #{empid}
+		</if>
+	</select>
+	
+	<insert id="add" parameterType = "Medicinepayreceipt">
+		insert into Medicinepayreceipt(maid, mprcontent, inpatid, mprdate, empid, amount, isDelete)
+		values (#{maid},#{mprcontent},#{inpatid},#{mprdate},#{empid},#{amount},#{isdelete})
+		<selectKey keyColumn="mprid" keyProperty="mprid" resultType="int">
+			SELECT LAST_INSERT_id()
+		</selectKey>
+	</insert>
+	
+	<select id="findById" parameterType = "Integer" resultMap = "resultMedicinepayreceipt">
+		select mpr.*, ip.*, p.*, ma.*, e.* from medicinePayReceipt mpr, Inpatient ip, patient p,
+		medicalAdvice ma, employee e where mpr.maid = ma.maid and mpr.inpatid = ip.inpatid and
+		ip.patid = p.patid and mpr.empid = e.empid and mprid = #{mprid} and mpr.isDelete != 0
+		
+	</select>
+	
+	<update id="update" parameterType = "Medicinepayreceipt">
+		update Medicinepayreceipt set
+		<if test="mprcontent != null and mprcontent != ''">
+			mprcontent = #{mprcontent},
+		</if>
+		<if test="mprdate != null and mprdate != ''">
+			mprdate = #{mprdate},
+		</if>
+		<if test="amount != null and amount != ''">
+			amount = #{amount}
+		</if>
+		where mprid = #{mprid}
+	</update>
+	
+	<delete id="delete" parameterType = "Integer">
+		update Medicinepayreceipt set isDelete = 0 where mprid = #{mprid}
+	</delete>
+	
+</mapper>

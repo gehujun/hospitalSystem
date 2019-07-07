@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.TravelArrangeDao">
+
+
+	<resultMap type="Travelarrange" id="resTravelArrange">
+		<id column="travelid" property="travelid"/>
+		<id column="travelempid" property="travelempid"/>
+		<result column="travellicence" property="travellicence"/>
+		<result column="isdelete" property="isdelete"/>
+		
+	<association property="travelactivities" javaType="Travelactivities">
+		<id column="traid" property="traid"/> 	
+		<result column="traid" property="traid"/>
+		<result column="traname" property="traname"/>
+	</association>
+	
+	<association property="emp" javaType="Employee">
+		<id column="empid" property="empid"/> 	
+		<result column="empid" property="empid"/>
+		<result column="empname" property="empname"/>
+	</association>
+	
+	</resultMap>
+	
+	
+	
+	<select id="queryTravelId" resultType="Travelactivities">
+		select * from Travelactivities where isdelete = 1
+	</select>
+	
+	<select id="queryTravelEmpId" resultType="Employee">
+		select * from Employee where isdelete = 1
+	</select>
+	
+	<sql id="joinQuerySql">
+		FROM Travelarrange ta, Employee emp, Travelactivities tac where ta.travelid = tac.traid and ta.travelempid = emp.empid 
+			and ta.isdelete = 1 and emp.isdelete = 1 and tac.isdelete = 1
+	</sql>
+	
+	<select id="queryAll" resultMap="resTravelArrange">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+   
+   	<select id="queryByJoin" resultMap="resTravelArrange">
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   </select>
+	
+	<sql id="conditionSql">
+		<if test="traname!=null and traname!=''">
+			and tac.traname like concat('%',concat(#{traname},'%'))
+		</if>
+		
+		<if test="empname !=null and empname!=''">
+			and emp.empname like concat('%',concat(#{empname},'%'))
+		</if>
+	</sql>
+	
+	<select id="queryByCondition" parameterType="map"  resultMap="resTravelArrange" >
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   		<include refid="conditionSql"></include>
+   </select>
+   
+
+
+	<select id="findByID" parameterType="map" resultType="Travelarrange">
+        select * from Travelarrange where travelid = #{traid} and travelempid = #{empid} and isdelete = 1
+   </select>
+
+
+	<update id="deleteById" parameterType="map">
+		update Travelarrange set isdelete = 0 where travelid = #{traid} and travelempid = #{empid}
+	</update>
+
+	
+	<update id="updateTravelArrange" parameterType="Travelarrange">
+			update Travelarrange set
+		<if test="travellicence  !=null and  travellicence !=''">
+             travellicence=#{travellicence}
+        </if>
+		where  travelid=#{travelid} and travelempid=#{travelempid}
+	</update>
+
+	<insert id="addTravelArrange" parameterType="Travelarrange">
+		insert into Travelarrange
+		(travelid,travelempid,travellicence,isdelete)
+		values (#{travelid},#{travelempid},#{travellicence},1)
+		
+		
+		
+<!--  		 自动增长后的主键   --> 
+<!--          <selectKey keyColumn="travelid" keyProperty="travelid" resultType="int"> -->
+<!--          	SELECT LAST_INSERT_id() -->
+<!--          </selectKey> -->
+
+	</insert>
+	
+
+</mapper>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namesapce 命名空间 -->
+
+<mapper namespace="com.web.dao.DutytableDao">
+
+	<resultMap type="Dutytable" id="resDutytable">
+		<id column="dutyid" property="dutyid"/>
+			<result column="wardname" property="wardname"/>
+			<result column="empid" property="empid"/>
+			<result column="dutydate" property="dutydate"/>
+			
+		<association property="emp" javaType="Employee">
+			<id column="empid" property="empid"/>
+			<result column="empname" property="empname"/>
+		</association>
+	</resultMap>
+	
+  <!-- 查询 -->
+  	 <select id="query" resultMap="resDutytable">
+        select *
+			from dutytable d,ward w, employee e
+				where d.empId=e.empid and w.wardName=d.wardName and d.isDelete!=0
+				
+     </select>
+     
+     
+	<select id="queryByCondition" parameterType="map" resultMap="resDutytable">
+        SELECT *
+        from dutytable d,ward w, employee e
+		<include refid="Condition"></include>
+   		
+   </select>
+  
+     
+      <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="Condition">
+           <where>
+		        d.empId=e.empid and w.wardName=d.wardName and d.isDelete!=0
+		         <if test="wardname !=null and  wardname !=''">
+				        and w.wardname like concat('%',concat(#{wardname},'%'))
+				  </if>
+				<if test="emp !=null and emp!=''">
+				       and e.empname like concat('%',concat(#{emp},'%'))
+				  </if>
+		    </where>
+     </sql>
+     
+    
+     <!-- 删除语句 -->
+     <delete id="delete" >
+         update Dutytable set isdelete=0       
+		 	  where dutyid=#{dutyid}
+    </delete>
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="Dutytable">
+         update Dutytable set		  
+		  <if test="wardname!=null and  wardname!=''">
+		      wardname=#{wardname}
+		  </if>
+		  <if test="empid!=null and  empid!=''">
+		      ,empid=#{empid}
+		  </if>
+		  <if test="dutydate!=null and  dutydate!=''">
+		      ,dutydate=#{dutydate}
+		  </if>
+		  where dutyid=#{dutyid}
+    </update>
+    
+    <!-- 通过ID查找 -->
+    <!-- 根据id查询对象 -->
+    <select id="findById" resultMap="resDutytable">
+       select *
+			from dutytable d,ward w, employee e
+       			where d.dutyid=#{dutyid} and d.empId=e.empid and w.wardName=d.wardName and d.isDelete!=0
+    </select>
+    
+    <insert id="add" parameterType="Dutytable">
+		insert into Dutytable (wardname,empid,dutydate,isdelete)
+		values (#{wardname},#{empid},#{dutydate},1)
+	</insert>
+	
+	<select id="empSelect" resultType = "Employee">
+		select * from employee
+	</select>
+	
+	<select id="wardnameSelect" resultType = "Ward">
+		select * from ward
+	</select>
+    
+</mapper>
+
+

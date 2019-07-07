@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.AttendanceDao">
+
+
+	<resultMap type="Attendance" id="resAttendance">
+		<id column="attenid" property="attenid"/>
+		<id column="worktime" property="worktime"/>
+		<result column="isattendant" property="isattendant"/>
+		
+	<association property="wh" javaType="Workinghours">
+		<id column="worktime" property="worktime"/> 		
+	</association>
+	
+	<association property="emp" javaType="Employee">
+		<id column="empid" property="empid"/> 
+		<result column="empname" property="empname"/> 
+	</association>
+	
+	</resultMap>
+	
+	
+	
+	<select id="queryEmp" resultType="Employee">
+		select * from Employee where isdelete = 1
+	</select>
+
+
+	<select id="queryAt" resultType="Attendance">
+		select * from Attendance where isdelete = 1
+	</select>
+	
+	<select id="queryWt" resultType="Workinghours" >
+		select * from Workinghours where isdelete = 1
+	</select>
+
+	
+	<sql id="joinQuerySql">
+		FROM Attendance at, Employee emp, Workinghours wt where at.attenid = emp.empid and at.worktime = wt.worktime 
+			and at.isdelete = 1 and emp.isdelete = 1 and wt.isdelete = 1
+	</sql>
+	
+	<select id="queryAll" resultMap="resAttendance">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+   
+   	<select id="queryByJoin" resultMap="resAttendance">
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   </select>
+	
+	<sql id="conditionSql">
+		<if test="empname !=null and empname !=''">
+			and emp.empname like concat('%',concat(#{empname},'%'))
+		</if>
+		
+<!-- 		<if test="facirefirm !=null and facirefirm !=''"> -->
+<!-- 			and fr.facirefirm like concat('%',concat(#{facirefirm},'%')) -->
+<!-- 		</if> -->
+	</sql>
+	
+	<select id="queryByCondition" parameterType="String" resultMap="resAttendance">
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   		<include refid="conditionSql"></include>
+   </select>
+   
+
+
+	<select id="findByID" parameterType="Attendance" resultType="Attendance">
+        select * from Attendance where attenid = #{attenid} and isdelete = 1
+   </select>
+
+
+	<update id="deleteById" parameterType="Attendance">
+		update Attendance set isdelete = 0 where attenid = #{attenid} 
+<!-- 		and worktime = #{worktime} -->
+	</update>
+
+	
+	<update id="updateAttendance" parameterType="Attendance">
+			update Attendance set
+		<if test="isattendant  !=null and  isattendant !=''">
+             isattendant=#{isattendant}
+        </if>
+		where  attenid=#{attenid}
+	</update>
+
+	<insert id="addAttendance" parameterType="Attendance">
+		insert into Attendance
+		(attenid,worktime,isattendant,isdelete)
+		values (#{attenid},#{worktime},#{isattendant},1)
+		
+		
+		
+<!--  		 自动增长后的主键   --> 
+<!--          <selectKey keyColumn="travelid" keyProperty="travelid" resultType="int"> -->
+<!--          	SELECT LAST_INSERT_id() -->
+<!--          </selectKey> -->
+
+	</insert>
+	
+
+</mapper>

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.SurgeryCommissionDao">
+
+
+	<resultMap type="Surgerycommission" id="resSurgerycommission">
+		<id column="surcid" property="surcid"/>
+		<result column="surctype" property="surctype"/>
+		<result column="surcpushfee" property="surcpushfee"/>
+		<result column="isdelete" property="isdelete"/>
+
+	<association property="emp" javaType="Employee">
+		<id column="empid" property="empid"/> 	
+		<result column="empid" property="empid"/>
+		<result column="empname" property="empname"/>
+	</association>
+	
+	</resultMap>
+
+	<select id="queryEmpId" resultType="Employee">
+		select * from Employee where isdelete = 1
+	</select>
+	
+	<sql id="joinQuerySql">
+		FROM Employee emp, surgerycommission sc where sc.surcid = emp.empid and sc.isdelete = 1
+	</sql>
+	
+	<select id="queryByJoin" resultMap="resSurgerycommission">
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   </select>
+	
+	
+	
+	<select id="query" resultMap="resSurgerycommission">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+	
+	<sql id="conditionSql">
+		<if test="empname!=null and empname!=''">
+			and emp.empname like concat('%',concat(#{empname},'%'))
+		</if>
+		<if test="surctype!=null and surctype!=''">
+			and sc.surctype like concat('%',concat(#{surctype},'%'))
+		</if>
+	</sql>
+	
+	<select id="queryByCondition" parameterType="map"  resultMap="resSurgerycommission" >
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   		<include refid="conditionSql"></include>
+   </select>
+   
+	<select id="querySCEmpId" resultType="Employee">
+		select * from Employee where isdelete = 1
+	</select>
+
+	<select id="findById" parameterType="Integer" resultType="Surgerycommission">
+        select * from Surgerycommission where surcid=#{empid} and isdelete = 1
+   </select>
+
+
+	<update id="deleteById" parameterType="Surgerycommission">
+		update Surgerycommission set isdelete = 0 where surcid = #{surcid}
+	</update>
+
+	
+		<update id="updateSurgerycommission" parameterType="Surgerycommission">
+		update Surgerycommission set
+		<if test="surctype !=null and  surctype !=''">
+             surctype=#{surctype},
+        </if>
+		<if test="surcpushfee  !=null and  surcpushfee !=''">
+             surcpushfee=#{surcpushfee}
+        </if>
+		where surcid = #{surcid}
+	</update>
+
+	<insert id="addSurgerycommission" parameterType="Surgerycommission">
+		insert into Surgerycommission 
+		(surcid,surctype,surcpushfee,isdelete)
+		values (#{surcid},#{surctype},#{surcpushfee},1)
+
+	</insert>
+	
+
+</mapper>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.MedicineDao">
+
+
+	<resultMap type="Medicine" id="resMedicine">
+		<id column="mediid" property="mediid"/>
+		<result column="mediid" property="mediid"/>
+		<result column="mediname" property="mediname"/>
+		<result column="medispecifi" property="medispecifi"/>
+		<result column="mediunit" property="mediunit"/>
+		<result column="mediprice" property="mediprice"/>
+		<result column="mediexpirationdate" property="mediexpirationdate"/>
+		<result column="medifirm" property="medifirm"/>
+		<result column="isdelete" property="isdelete"/>
+		
+	<association property="ml" javaType="Medicinelibrary">
+		<id column="meliid" property="meliid"/> 	
+		<result column="meliid" property="meliid"/>
+		<result column="meliaddr" property="meliaddr"/>
+	</association>
+	
+	</resultMap>
+
+	<sql id="basedCondition">
+		FROM Medicinelibrary where isdelete = 1
+	</sql>
+	
+	<sql id="joinQuerySql">
+		FROM Medicine md, Medicinelibrary ml where md.meliid = ml.meliid and md.isdelete = 1
+	</sql>
+	
+	<sql id="conditionSql">
+		<if test="medifirm!=null and medifirm!=''">
+			and md.medifirm like concat('%',concat(#{medifirm},'%'))
+		</if>
+		
+		<if test="meliaddr !=null and meliaddr!=''">
+			and ml.meliaddr like concat('%',concat(#{meliaddr},'%'))
+		</if>
+	</sql>
+	
+	<select id="queryByCondition" parameterType="map" resultMap="resMedicine" >
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   		<include refid="conditionSql"></include>
+   </select>
+   
+	<select id="queryByJoin" resultType="Medicinelibrary">
+        SELECT *
+   		<include refid="basedCondition"></include>
+   </select>
+   
+   	<select id="queryAll" resultMap="resMedicine">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+   
+
+	<select id="findByID" parameterType="int" resultType="Medicine">
+        select * from Medicine where mediid = #{mediid}
+   </select>
+
+	<update id="deleteById" parameterType="int">
+		update Medicine set isdelete = 0 where mediid = #{mediid}
+	</update>
+	
+		<update id="updateMedicine" parameterType="Medicine">
+		update Medicine set
+		<if test="mediid !=null and  mediid !=''">
+             meliid =#{meliid},
+        </if>
+		<if test="mediname !=null and  mediname !=''">
+             mediname=#{mediname},
+        </if>
+		<if test="medispecifi !=null and  medispecifi !=''">
+             medispecifi=#{medispecifi},
+        </if>
+		<if test="mediunit  !=null and  mediunit !=''">
+             mediunit=#{mediunit},
+        </if>
+		<if test="mediprice  !=null and  mediprice !=''">
+             mediprice=#{mediprice},
+        </if>
+        
+		<if test="mediexpirationdate   !=null and  mediexpirationdate !=''">
+             mediexpirationdate=#{mediexpirationdate},
+        </if>
+		<if test="medifirm   !=null and  medifirm  !=''">
+             medifirm=#{medifirm},
+        </if>
+		<if test="isdelete  !=null and  isdelete  !=''">
+             isdelete=#{isdelete}
+        </if>
+		where mediid = #{mediid}
+	</update>
+
+	<insert id="addMedicine" parameterType="Medicine">
+<!-- 		insert into Medicine  -->
+<!-- 		(mediid,meliid,mediname,medispecifi ,mediunit ,mediprice ,mediexpirationdate ,medifirm ,isdelete) -->
+<!-- 		values (#{mediid},#{meliid},#{mediname},#{medispecifi},#{mediunit},#{mediprice},#{mediexpirationdate}, -->
+<!-- 		#{medifirm},1) -->
+
+		insert into Medicine 
+		(meliid,mediname,medispecifi ,mediunit ,mediprice ,mediexpirationdate ,medifirm ,isdelete)
+		values (#{meliid},#{mediname},#{medispecifi},#{mediunit},#{mediprice},#{mediexpirationdate},
+		#{medifirm},1)
+		
+<!-- 		 自动增长后的主键   -->
+         <selectKey keyColumn="mediid" keyProperty="mediid" resultType="int">
+         	SELECT LAST_INSERT_id()
+         </selectKey>
+
+	</insert>
+	
+
+</mapper>

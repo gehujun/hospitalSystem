@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namesapce 命名空间 -->
+
+<mapper namespace="com.web.dao.BedDao">
+
+	<resultMap type="Bed" id="resBed">
+		<id column="bedid" property="bedid"/>
+			<result column="wardname" property="wardname"/>
+			<result column="empiddoc" property="empiddoc"/>
+			<result column="empidnur" property="empidnur"/>
+			<result column="isemptybed" property="isemptybed"/>
+			<result column="bedrent" property="bedrent"/>
+			
+		<association property="empdoc" javaType="Employee" column="empiddoc" select="selectEmpById">
+			<id column="empid" property="empid"/>
+			<result column="docname" property="empname"/>
+		</association>
+		
+		<association property="empnur" javaType="Employee" column="empidnur" select="selectEmpById">
+			<id column="empid" property="empid"/>
+			<result column="nurname" property="empname"/>
+		</association>
+	</resultMap>
+
+	<resultMap type="Employee" id="EmpMapper" >
+		<id column="empid" property="empid" jdbcType="INTEGER"/>
+		<result column="empnanme" property="empname" jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="selectEmpById" parameterType="int" resultMap="EmpMapper">
+		select * from employee where empid = #{_parameter}
+	</select>
+
+	<select id="queryByCondition" parameterType="Bed" resultMap="resBed">
+        SELECT *
+        from bed b,ward w,employee e2,employee e1
+		<include refid="bedCondition"></include>
+   		
+   </select>
+  
+  
+	<sql id="basedCondition">
+		from bed b,ward w,employee e2,employee e1
+		where b.empiddoc=e1.empId and b.empidnur=e2.empId 
+			and b.wardname=w.wardname and b.isDelete!=0
+	</sql>
+  
+  
+  <!-- 查询 -->
+  	 <select id="query" resultMap="resBed">
+          select b.bedid,b.wardname,b.isemptybed,b.bedrent,e1.empname,e2.empname
+			from bed b,ward w,employee e1,employee e2
+				where b.empiddoc=e1.empId and b.empidnur=e2.empId and b.wardname=w.wardname and b.isDelete!=0
+     </select>
+     
+      <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="bedCondition">
+           <where>
+		         b.empiddoc=e1.empId and b.empidnur=e2.empId and b.wardname=w.wardname and b.isDelete!=0
+		         <if test="wardname!=null and  wardname!=''">
+				       and b.wardname like concat('%',concat(#{wardname},'%'))
+				  </if>
+				<if test="bedrent!=null and  bedrent!=''">
+				       and b.bedrent=#{bedrent} 
+				  </if>
+				 and b.isDelete!=0
+		    </where>
+     </sql>    
+    
+     <!-- 删除语句 -->
+     <delete id="delete" parameterType="Integer">
+         update Bed set isdelete=0       
+		 	  where bedid=#{bedid}
+    </delete>
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="Bed">
+         update Bed set
+          <if test="bedrent!=null and  bedrent!=''">
+             bedrent=#{bedrent}
+          </if>
+           <if test="isemptybed!=null and  isemptybed!=''">
+		      ,isemptybed=#{isemptybed}
+		  </if>
+		  <if test="wardname!=null and  wardname!=''">
+		      ,wardname=#{wardname}
+		  </if>
+		  <if test="empiddoc!=null and  empiddoc!=''">
+		      ,empiddoc=#{empiddoc}
+		  </if>
+		  <if test="empidnur!=null and  empidnur!=''">
+		      ,empidnur=#{empidnur}
+		  </if>
+		  where bedid=#{bedid}
+    </update>
+    
+    <sql id="baseCondition">
+    	from bed b,ward w,employee e1,employee e2
+				where b.empiddoc=e1.empId and b.empidnur=e2.empId and b.wardname=w.wardname and b.isDelete!=0
+    </sql>
+    
+    <select id="findById" parameterType="Integer" resultMap="resBed">
+       select * 
+       		<include refid="baseCondition"></include>
+       		and b.bedid=#{bedid}
+    </select>
+    
+    <insert id="add" parameterType="Bed">
+		insert into bed (wardname,isemptybed,isdelete,empiddoc,empidnur,bedrent)
+		values (#{wardname},#{isemptybed},1,#{empiddoc},#{empidnur},#{bedrent})
+	</insert>
+	
+	<select id="empidSelect" resultType = "Employee">
+		select * from employee
+	</select>
+	
+	<select id="wardnameSelect" resultType = "Ward">
+		select * from ward
+	</select>
+    
+</mapper>
+

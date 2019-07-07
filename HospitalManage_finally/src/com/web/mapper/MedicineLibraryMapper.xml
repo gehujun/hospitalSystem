@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.MedicineLibraryDao">
+	<resultMap type="Medicinelibrary" id="resMedicinelibrary">
+		<id column="meliid" property="meliid"/>
+		<result column="meliman" property="meliman"/>
+		<result column="meliaddr" property="meliaddr"/>
+		<result column="meliarea" property="meliarea"/>
+		<result column="meliunit" property="meliunit"/>
+		<result column="isdelete" property="isdelete"/>
+	
+	<association property="emp" javaType="Employee">
+		<id column="empid" property="empid"/>
+		<id column="empid" property="empid"/>
+		<result column="empname" property="empname"/>
+	</association>
+	
+	
+	</resultMap>
+
+	<sql id="conditionSql">
+		
+		<if test="meliid!=null and  meliid!=''">
+			and mdclib.meliid like concat('%',concat(#{meliid},'%'))
+		</if>
+		<if test="meliaddr !=null and meliaddr!=''">
+			and mdclib.meliaddr like concat('%',concat(#{meliaddr},'%'))
+		</if>
+		
+	</sql>
+
+	<sql id="basedCondition">
+		from Employee where isdelete = 1
+	</sql>
+	
+	<sql id="joinQuerySql">
+		from Employee emp, Medicinelibrary mdclib where mdclib.meliman = emp.empid and mdclib.isdelete = 1
+	 
+	</sql>
+
+	
+	<select id="queryByCondition" parameterType="map" resultMap="resMedicinelibrary">
+        SELECT * 
+		<include refid="joinQuerySql"></include>
+		<include refid="conditionSql"></include>
+   </select>
+   
+<!--    <select id="queryByJoin" resultType="Employee"> -->
+<!--         SELECT * -->
+<!--       <include refid="basedCondition"></include> -->
+<!--    </select> -->
+   
+    <select id="query" resultMap="resMedicinelibrary">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+   
+      <select id="queryByJoin" resultType="Employee">
+        SELECT *
+      <include refid="basedCondition"></include>
+   </select>
+   
+
+
+	<select id="findById" parameterType="Integer" resultType="Medicinelibrary">
+        select * from Medicinelibrary where meliid =#{meliid}
+   </select>
+
+	<update id="deleteById" parameterType="Medicinelibrary">
+		update Medicinelibrary set isdelete = 0 where meliid = #{meliid}
+	</update>
+
+	<insert id="addMedicineLib" parameterType="Medicinelibrary">
+		insert into Medicinelibrary 
+		(meliman,meliaddr,meliarea,meliunit,isdelete)
+		values (#{meliman},#{meliaddr},#{meliarea},#{meliunit},1)
+		<selectKey keyColumn="meliid" keyProperty="meliid" resultType="Integer">
+         	SELECT LAST_INSERT_id()
+         </selectKey>
+	</insert>
+	
+	<update id="updateMedicineLib" parameterType="Medicinelibrary">
+		update Medicinelibrary set
+		<if test="meliman!=null and  meliman!=''">
+             meliman=#{meliman},
+        	</if>
+		<if test="meliaddr!=null and  meliaddr!=''">
+             meliaddr=#{meliaddr},
+        	</if>
+        <if test="meliarea!=null and meliarea!=''">
+        	meliarea=#{meliarea},
+        	</if>
+        <if test="meliunit!=null and meliunit!=''">
+        	meliunit=#{meliunit}
+        	</if>
+		where meliid = #{meliid}
+	</update>
+
+</mapper>

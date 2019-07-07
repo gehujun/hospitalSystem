@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.medicalAdviceDao">
+	<!-- <insert id=""></insert> -->
+	<resultMap type = "Medicaladvice" id = "resultMedicaladvice">
+		<id column = "maid" property = "maid"/>
+		
+		<result column="diseasename" property="diseasename"/>
+		<result column="macontent" property="macontent"/>
+		<result column="madate" property="madate"/>
+		<result column="empid" property="empid"/>
+		<result column="inpatid" property="inpatid"/>
+		<result column="isout" property="isout"/>
+		
+		<association property = "inp" javaType = "Inpatient">
+			<id column = "inpatid" property = "inpatid"/>
+			
+			<result column="patid" property="patid"/>
+		</association>
+		
+		<association property = "emp" javaType = "Employee">
+			<id column = "empid" property = "empid"/>
+			
+			<result column="profid" property="profid"/>
+			
+			<result column="empname" property="empname"/>
+			<result column="emptel" property="emptel"/>
+			
+		</association>
+		
+		<association property = "prot" javaType = "Professionaltitle">
+			<id column = "profid" property = "profid"/>
+			
+			<result column="profname" property="profname"/>
+		</association>
+		
+		<association property = "pat" javaType = "Patient">
+			<id column = "patid" property = "patid"/>
+			
+			<result column="patname" property="patname"/>
+			<result column="patsex" property="patsex"/>
+			<result column="patage" property="patage"/>
+		</association>
+	</resultMap>
+	<!-- and m.empId = e.empId and i.inpatId = m.inpatId and i.patId = p.patId
+			and pro.profId = e.profId -->
+	<select id="query" resultMap = "resultMedicaladvice" parameterType = "Medicaladvice">
+		select m.*, i.*, e.*, pro.*, p.* from medicaladvice m, inpatient i, employee e, professionaltitle pro, patient p
+			where m.empid = e.empid and i.inpatid = m.inpatid and i.patid = p.patid
+			and pro.profid = e.profid and m.isdelete != 0
+			<if test="diseasename != null and diseasename != ''">
+				and m.diseasename like concat('%', concat(#{diseasename}, '%'))
+			</if>
+			<if test="empid != null and empid != ''">
+				and m.empid = #{empid}
+			</if>
+			<if test="maid != null and maid != ''">
+				and m.maid = #{maid}
+			</if>
+		<!-- select m.*, i.* from medicaladvice m, inpatient i
+			where m.isDelete != 1 and i.inpatId = m.inpatId
+			<if test="diseaseName != null and diseaseName != ''">
+				and m.diseaseName = #{diseaseName}
+			</if>
+			<if test="empId != null and empId != ''">
+				and m.empId = #{empId}
+			</if>
+			<if test="inpatId != null and inpatId != ''">
+				and m.inpatId = #{inpatId}
+			</if>	 -->
+	</select>
+	<!-- <select id="query" resultType = "Medicaladvice" parameterType = "Medicaladvice">
+		select * from medicaladvice
+	</select> -->
+	<insert id="add" parameterType = "Medicaladvice">
+		insert into Medicaladvice(diseaseName, madate, maContent, empId, inpatId, isOut, isDelete)
+		values(#{diseasename}, #{madate}, #{macontent}, #{empid}, #{inpatid}, #{isout}, #{isdelete})
+		<selectKey keyColumn="maid" keyProperty="maid" resultType="int">
+			SELECT LAST_INSERT_id()
+		</selectKey>
+	</insert>
+	
+	<select id="findById" parameterType = "Integer" resultMap = "resultMedicaladvice">
+		select m.*, i.*, e.*, pro.*, p.* from medicaladvice m, inpatient i, employee e, professionaltitle pro, patient p
+			where m.isDelete != 0 and m.empId = e.empId and i.inpatId = m.inpatId and i.patId = p.patId
+			and pro.profId = e.profId and m.maId = #{maid}
+			
+		<!-- select m.*, i.* from medicaladvice m, inpatient i where m.isDelete != 1 and i.inpatId = m.inpatId and m.maId = #{maId} -->
+	</select>
+	<select id="findinpatId" parameterType = "Integer" resultType = "Integer">
+		select inpatId from medicaladvice where maId = #{maid}
+	</select>
+	<update id="update" parameterType = "Medicaladvice">
+		update medicaladvice set
+		<if test="diseasename != null and diseasename != ''">
+			diseaseName = #{diseasename},
+		</if>
+		<if test="macontent != null and macontent != ''">
+			maContent = #{macontent},
+		</if>
+		<if test="isout != null and isout != ''">
+			isOut = #{isout}
+		</if>
+		where maId = #{maid}
+	</update>
+	
+	<delete id="delete" parameterType = "Integer">
+		update medicaladvice set isDelete = 0 where maId = #{maId}
+	</delete>
+	<select id="maIdSelect" resultType = "Medicaladvice">
+		select * from medicaladvice
+	</select>
+	
+</mapper>

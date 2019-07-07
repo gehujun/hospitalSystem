@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.UserDao">
+
+	<resultMap type="Employee" id="resEmployee">
+		<id column="empid" property="empid"/>
+		<result column="profid" property="profid"/>
+		<result column="empname" property="empname"/>
+		<result column="empsex" property="empsex"/>
+		
+		<association property="prof" javaType="professionaltitle">
+             <!-- 主键 -->
+             <id column="profid" property="profid"/>
+             <result column="profname" property="profname"/>
+             <result column="isDelete" property="isdelete"/>
+       </association>
+	</resultMap>
+
+   <!-- 登录查询 -->
+  <select id="login" resultType="Employee">
+    select * from employee  where empname=#{userName} and password=#{userPwd}
+  </select>   
+   
+   <sql id="conditionSql">
+		<if test="empName!=null and empName!=''">
+           and emp.empname like concat('%',concat(#{empName},'%'))
+        </if>
+        <if test="profName!=null and profName!=''">
+           and prof.profid = #{profName}
+        </if>
+   </sql>
+   
+	<select id="queryByCondition" parameterType="map" resultMap="resEmployee">
+		select emp.*, prof.*
+		from employee emp, professionaltitle prof
+		where emp.isdelete = 1 and prof.isdelete = 1 and emp.profid = prof.profid
+		<include refid="conditionSql"></include>
+	</select>
+	
+	<update id="delete" parameterType = "Integer">
+    	update employee set isdelete = 0 where empid=#{empid}
+    </update>
+	
+	<insert id="add" parameterType="Employee">
+		insert into employee (empid,profid,empname,empsex,password,isdelete) 
+		values (#{empid},#{profid},#{empname},#{empsex},"123456",1)
+	</insert>
+	
+	<select id="findByID" parameterType="int" resultMap="resEmployee">
+        select * from employee where empid=#{empid}
+   </select>
+	
+	<!-- 修改 -->
+     <update id="update" parameterType="Employee">
+         update employee set
+          <if test="empname!=null and  empname!=''">
+             empname=#{empname},
+          </if>
+           <if test="empsex!=null and  empsex!=''">
+		     empsex=#{empsex},
+		  </if>
+		   <if test="profid!=null and  profid!=''">
+		     profid=#{profid}
+		  </if>
+		  where empid=#{empid}
+    </update>
+	
+</mapper>
+

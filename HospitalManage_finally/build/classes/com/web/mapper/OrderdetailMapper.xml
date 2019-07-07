@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.OrderdetailDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Orderdetail" id="resultOrderdetail">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="detid" property="detid"/>
+      
+      <result column="ordid" property="ordid"/>
+      <result column="mediid" property="mediid"/>
+      <result column="detnum" property="detnum"/>
+      <result column="dettotalfee" property="dettotalfee"/>
+      <result column="detbatchnum" property="detbatchnum"/>
+      <result column="isdelete" property="isdelete"/>
+      
+       <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="orders" javaType="Order">
+         <id column="ordid" property="ordid"/>
+         
+        <!--  <result column="userName" property="userName"/> -->
+
+     </association>
+     
+      <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="medicine" javaType="Medicine">
+         <id column="mediid" property="mediid"/>
+         
+<!--          <result column="userName" property="userName"/> -->
+
+     </association>
+  
+     <!-- 一对多   ofType:关联的对象
+     <collection property="positionList" ofType="TPosition">
+           <id column="poId" property="poId"/>
+           
+           <result column="poName" property="poName"/>
+           <result column="detid" property="detid"/>
+           <result column="poSalary" property="poSalary"/>
+           <result column="isDelete" property="isDelete"/>
+     </collection> -->
+     
+   </resultMap>
+ 
+     <!-- 查询 
+             SELECT d.*,p.*
+		    from t_position p,t_orderdetail d
+		       where p.detid=d.detid
+     -->
+     <select id="query" resultMap="resultOrderdetail">
+          select od.*,o.*,m.*
+          	from Orderdetail od,`Order` o,Medicine m
+          		where od.ordid=o.ordid
+          	   and od.mediid=m.mediid
+     </select>
+    
+     
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="orderdetailCondition">
+           <where>
+		          od.ordid=o.ordid and od.mediid=m.mediid
+		         <!-- <if test="ordid!=null and  ordid!=''">
+				       and d.ordid like concat('%',concat(#{ordid},'%'))
+				  </if> -->
+				  <if test="detnum !=null and detnum!=''">
+				      and od.detnum like concat('%',concat(#{detnum},'%'))
+				  </if>
+				  <if test="mediid !=null and mediid!=''">
+				      and od.detbatchnum like concat('%',concat(#{detbatchnum},'%'))
+				  </if>
+				  and od.isDelete!=0
+		    </where>
+     </sql>
+
+   <!--resultMap:结果集      parameterType:参数类型
+    SELECT d.*,p.*
+		    from t_position p,t_orderdetail d
+		       where p.detid=d.detid
+		  <if test="ordid!=null and  ordid!=''">
+		       and d.ordid like concat('%',concat(#{ordid},'%'))
+		  </if>
+		  <if test="detnum !=null and detnum!=''">
+		      and d.detnum like concat('%',concat(#{detnum},'%'))
+		  </if>
+		  
+		  include:包含     refid:引用的id名称-->
+    <select id="queryByCondition" resultMap="resultOrderdetail" parameterType="Orderdetail">
+           select od.*,o.*,m.*
+          	from Orderdetail od,`Order` o,Medicine m
+		   <include refid="orderdetailCondition"/>
+    </select>
+    
+    <!-- 
+     SELECT d.*,p.*
+		    from t_position p,t_orderdetail d
+         where p.detid=d.detid
+           and d.detid in (1,2,3)
+           collection:集合    open：开始标签    close:结束标签      item:集合中的每个对象（变量）
+           separator:分隔符
+     -->
+<!--     <select id="queryByIds" parameterType="Integer" resultMap="resultOrderdetail" >
+            SELECT d.*,p.*
+		    from t_position p,t_orderdetail d
+		    <where>
+		         p.detid=d.detid
+		         <if test="ids != null and ids.size>0">
+			         <foreach collection="ids" open="and d.detid in (" close=")" item="detid" separator="," >
+			               #{detid}
+			         </foreach>
+		         </if>
+		    </where>
+    </select> -->
+    
+    <!-- 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="Orderdetail">
+       select * from Orderdetail where detid=#{detid}
+    </select>
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="Orderdetail">
+         update Orderdetail set
+          <if test="ordid!=null and  ordid!=''">
+             ordid=#{ordid},
+          </if>
+           <if test="mediid!=null and  mediid!=''">
+		      mediid=#{mediid},
+		  </if>
+		   <if test="detnum!=null and  detnum!=''">
+		      detnum=#{detnum},
+		  </if>
+		  <if test="dettotalfee!=null and  dettotalfee!=''">
+		      dettotalfee=#{dettotalfee},
+		  </if>
+		  <if test="detbatchnum!=null and  detbatchnum!=''">
+		      detbatchnum=#{detbatchnum}
+		  </if>
+		  where detid=#{detid}
+    </update>
+    
+    <!-- 删除 -->
+    <delete id="delete" parameterType = "Integer">
+    		<!-- delete from t_position where detid=#{detid}; -->
+    		<!-- delete from t_orderdetail where detid=#{detid} -->
+    		update Orderdetail set isdelete = 0 where detid=#{detid}
+    </delete>
+    
+    <insert id="add" parameterType="Orderdetail">     
+	   insert into Orderdetail (ordid, mediid, detnum,dettotalfee,detbatchnum,isdelete)
+	   values (#{ordid}, #{mediid},#{detnum},#{dettotalfee},#{detbatchnum},1)
+	   <!-- 自动增长后的主键   -->
+	   <selectKey keyColumn="detid" keyProperty="detid" resultType="int">
+	   	SELECT LAST_INSERT_id()
+	   </selectKey>
+    </insert>
+    
+</mapper>
+

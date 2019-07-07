@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.workinghoursDao">
+
+  <resultMap type="Workinghours" id="resultWorkinghours">
+    <id column="workid" property="workid" />
+    <result column="worktime" property="worktime" />
+    <result column="workempid" property="workempid" />
+    <result column="isdelete" property="isdelete" />
+  
+  <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="employee" javaType="Employee">
+         <id column="empid" property="empid"/>
+         <result column="empname" property="empname"/>
+     </association>
+ 
+  </resultMap>
+  
+  <select id="query" resultMap="resultWorkinghours">
+           SELECT workid,workempid,e.empname,worktime from workinghours w,employee e where w.workempid=e.empid
+  </select>
+  
+  <sql id="WorkinghoursCondition">
+    <where>
+      w.isdelete!=0
+      <if test="workid != null">
+      	and workid=#{workid}
+      </if>
+      <if test="workempid != null and workempid !=''">
+      	and workempid=#{workempid}
+      </if> 
+      <if test="empname != null and empname !=''">
+      	and e.empname like concat('%',concat(#{empname},'%'))
+      </if>
+      <if test="worktime != null">
+      	and worktime=#{worktime}
+      </if>
+      and w.workempid=e.empid
+    </where>
+  </sql>
+  
+  <select id="queryByCondition" resultMap="resultWorkinghours" parameterType="Workinghours">
+           SELECT workid,workempid,e.empname,worktime from workinghours w,employee e
+		   <include refid="WorkinghoursCondition"/>
+  </select>
+  
+  <!-- 根据id查询对象 -->
+  <select id="findByWorkId" parameterType="Integer" resultMap="resultWorkinghours">
+       select workempid,e.empname,worktime,workid from workinghours w,employee e where workid=#{workid}
+  </select>
+  
+  <delete id="delete" parameterType="Integer">
+    update workinghours set isdelete=0 where workid=#{workid}
+  </delete>
+  
+  <insert id="add" parameterType="Workinghours">
+    insert into workinghours (worktime, workempid, isdelete)
+    values (#{worktime}, #{workempid},1)
+    <!-- 自动增长后的主键   -->
+    <selectKey keyColumn="workid" keyProperty="workid" resultType="int">
+    	SELECT LAST_INSERT_id()
+    </selectKey>
+  </insert>
+
+  <update id="update" parameterType="Workinghours">
+    update workinghours
+    <set>
+      <if test="workempid != null">
+        workempid = #{workempid},
+      </if>
+      <if test="worktime != null">
+        worktime = #{worktime}
+      </if>
+      where workid=#{workid}
+    </set>
+    
+  </update>
+ 
+</mapper>

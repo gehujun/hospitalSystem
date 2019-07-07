@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.OrderDao">
+
+
+	<resultMap type="Order" id="resOrder">
+		<id column="ordid" property="ordid"/>
+		<result column="ordid" property="ordid"/>
+		<result column="ordnum" property="ordnum"/>
+		<result column="ordorddate" property="ordorddate"/>
+		<result column="orddeldate" property="orddeldate"/>
+		<result column="isdelete" property="isdelete"/>
+		
+	<association property="sup" javaType="Supplier">
+		<id column="supid" property="supid"/> 	
+		<result column="supid" property="supid"/>
+		<result column="supname" property="supname"/>
+	</association>
+	
+	<association property="emp" javaType="Employee">
+		<id column="empid" property="empid"/> 	
+		<result column="empid" property="empid"/>
+		<result column="empname" property="empname"/>
+	</association>
+	
+	</resultMap>
+	
+	
+	
+	<select id="querySupId" resultType="Supplier">
+		select * from Supplier where isdelete = 1
+	</select>
+	
+	<select id="queryEmpId" resultType="Employee">
+		select * from Employee where isdelete = 1
+	</select>
+	
+	<sql id="joinQuerySql">
+		FROM `Order` ord, Employee emp, Supplier sup where ord.supid = sup.supid and ord.empid = emp.empid and ord.isdelete = 1
+	</sql>
+	
+	<select id="queryByJoin" resultMap="resOrder">
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   </select>
+	
+	
+	
+	<select id="queryAll" resultMap="resOrder">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+	
+	<sql id="conditionSql">
+		<if test="supname!=null and supname!=''">
+			and sup.supname like concat('%',concat(#{supname},'%'))
+		</if>
+		
+		<if test="empname !=null and empname!=''">
+			and emp.empname like concat('%',concat(#{empname},'%'))
+		</if>
+	</sql>
+	
+	<select id="queryByCondition" parameterType="map"  resultMap="resOrder" >
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   		<include refid="conditionSql"></include>
+   </select>
+   
+
+
+	<select id="findByID" parameterType="int" resultType="Order">
+        select * from `Order` where ordid = #{ordid}
+   </select>
+
+
+	<update id="deleteById" parameterType="int">
+		update `order` set isdelete = 0 where ordid = #{ordid}
+	</update>
+
+	
+		<update id="updateOrder" parameterType="Order">
+		update `Order` set
+		<if test="supid !=null and  supid !=''">
+             supid=#{supid},
+        </if>
+		<if test="ordnum !=null and  ordnum !=''">
+             ordnum=#{ordnum},
+        </if>
+		<if test="ordorddate  !=null and  ordorddate !=''">
+             ordorddate=#{ordorddate},
+        </if>
+		<if test="orddeldate  !=null and  orddeldate !=''">
+             orddeldate=#{orddeldate},
+        </if>
+        
+		<if test="empid   !=null and  empid !=''">
+             empid=#{empid}
+        </if>
+		where ordid = #{ordid}
+	</update>
+
+	<insert id="addOrder" parameterType="Order">
+		insert into `Order` 
+		(ordid,supid,ordnum ,ordorddate ,orddeldate ,empid,isdelete)
+		values (#{ordid},#{supid},#{ordnum},#{ordorddate},#{orddeldate},#{empid},1)
+		
+<!-- 		 自动增长后的主键   -->
+         <selectKey keyColumn="ordid" keyProperty="ordid" resultType="int">
+         	SELECT LAST_INSERT_id()
+         </selectKey>
+
+	</insert>
+	
+
+</mapper>

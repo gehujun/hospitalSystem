@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namesapce 命名空间 -->
+<mapper namespace = "com.web.dao.InpatientDao">
+	<resultMap type = "Inpatient" id = "resultInpatient">
+		<id column = "inpatid" property = "inpatid"/>
+		
+		<result column="deptid" property="deptid"/>
+		<result column="entertime" property="entertime"/>
+		<result column="bedid" property="bedid"/>
+		<result column="state" property="state"/>
+		
+		<association property = "pat" javaType = "Patient">
+			<id column = "patid" property = "patid"/>
+			
+			<result column="patname" property="patname"/>
+			<result column="patsex" property="patsex"/>
+			<result column="patage" property="patage"/>
+			<result column="pattel" property="pattel"/>
+			<result column="patlinkmanname" property="patlinkmanname"/>
+			<result column="patlinkmantel" property="patlinkmantel"/>
+		</association>
+		
+		<association property = "b" javaType = "Bed">
+			<id column = "bedid" property = "bedid"/>
+			
+			<result column="wardname" property="wardname"/>
+			<result column="empiddoc" property="empiddoc"/>
+			<result column="empidnur" property="empidnur"/>
+		</association>
+		
+		
+		<association property = "dept" javaType = "Department">
+			<id column = "deptid" property = "deptid"/>
+			
+			<result column="deptname" property="deptname"/>
+		</association>
+	</resultMap>
+	
+	
+	<!-- 根据inpatid查找住院病人的信息 入院科室 入院时间 床号 状态
+		根据病人id 找姓名 性别 年龄 电话 联系人姓名 联系人电话 -->
+	<select id = "query" parameterType = "Inpatient" resultMap="resultInpatient">
+		select p.*, Inp.*,b.*,  dept.*
+			from patient p, Inpatient Inp, bed b, department dept
+			where Inp.patid = p.patid and Inp.isdelete != 0 and Inp.bedid = b.bedid and Inp.deptid = dept.deptid
+			
+			<if test="inpatid != null and inpatid != ''">
+				and Inp.inpatid = #{inpatid}
+			</if>
+			
+			<if test="deptid != null and deptid != ''">
+				and Inp.deptid = #{deptid}
+			</if>
+			<if test="bedid != null and bedid != ''">
+				and Inp.bedid = #{bedid}
+			</if>
+	</select>
+	<!-- 
+	<select id="queryAll" resultMap="resultInpatient">
+		select p.*, Inp.*, b.*, dept.* from patient p, Inpatient Inp, bed b, department dept
+			where Inp.patid = p.patid and Inp.isdelete != 1 and Inp.bedid = b.bedid and Inp.deptid = dept.deptid
+	</select> -->
+	
+	<!-- <select id="findById" parameterType = "String" resultType="Inpatient">
+		select * from Inpatient where inpatid = #{inpatid}
+	</select> 
+	
+	<select id="queryBypatname" parameterType = "String" resultType="resultInpatient">
+		select p.*, Inp.*, b.*, dept.* from patient p, Inpatient Inp, bed b, department dept
+			where Inp.patid = p.patid and Inp.isdelete != 1 and Inp.bedid = b.bedid and Inp.deptid = dept.deptid
+			<if test="patname != null and patname != ''">
+				and p.patname like concat('%',concat(#{patname},'%'))
+			</if>
+	</select>-->
+	<update id="updateInpatient" parameterType = "Inpatient">
+		update Inpatient set 
+		<if test="deptid != null and deptid != ''">
+			deptid = #{deptid},
+		</if>
+		<if test="bedid != null and bedid != ''">
+			bedid = #{bedid},
+		</if>
+		<if test="state != null and state != ''">
+			state = #{state}
+		</if>
+		where inpatid = #{inpatid} 
+	</update>
+	
+	<delete id = "updateIsDelete" parameterType = "Integer">
+		update Inpatient set isdelete = "0" where inpatid = #{inpatid}
+	</delete>
+	<select id="inpatIdSelect" resultType = "Inpatient">
+		select * from Inpatient
+	</select> 
+	<select id="findPatId" parameterType = "Integer" resultType = "Integer">
+		select patid from Inpatient where inpatid = #{inpatid}
+	</select>
+	
+</mapper>

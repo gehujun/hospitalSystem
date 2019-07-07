@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.doctoradviceDao">
+  <resultMap type="Doctoradvice" id="resultDoctoradvice">
+    <id column="docaid" property="docaid" />
+    <result column="docadate" property="docadate" />
+    <result column="docaillnessexplain" property="docaillnessexplain" />
+    <result column="docatreatmentscheme" property="docatreatmentscheme" />
+    <result column="docaempdocid" property="docaempdocid" />
+    <result column="patid" property="patid" />
+    <result column="isdelete" property="isdelete" />
+    
+    <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+    <!-- -->
+     <association property="employee" javaType="Employee">
+         <id column="empid" property="empid"/>
+         <result column="empname" property="empname"/>
+     </association>
+     <association property="patient" javaType="Patient">
+         <id column="patid" property="patid"/>
+         <result column="patname" property="patname"/>
+     </association>
+  
+  </resultMap>
+  
+  <select id="query" resultMap="resultDoctoradvice">
+           SELECT docaid,d.patid,patname,docaillnessexplain,docatreatmentscheme,docaempdocid,empname,docadate 
+           from doctoradvice d,employee e,patient p 
+           where d.patid=p.patid and docaempdocid=e.empid
+  </select>
+  
+  <sql id="DoctoradviceCondition">
+    <where>
+      d.isdelete!=0
+      <if test="docaid != null">
+      	and docaid=#{docaid}
+      </if>
+      <if test="patid != null">
+      	and d.patid=#{patid}
+      </if>
+      
+      <if test="patname != null and patname !=''">
+      	and p.patname like concat('%',concat(#{patname},'%'))
+      </if>
+      
+      <if test="docaempdocid != null">
+      	and docaempdocid=#{docaempdocid}
+      </if>
+      
+      <if test="empname != null and empname !=''">
+      	and e.empname like concat('%',concat(#{empname},'%'))
+      </if>
+      
+      <if test="docadate != null and docadate !=''">
+      	and docadate=#{docadate}
+      </if>
+      and d.patid=p.patid and d.docaempdocid=e.empid
+    </where>
+  </sql>
+  
+  <select id="queryByCondition" resultMap="resultDoctoradvice" parameterType="map">
+           SELECT docaid,d.patid,patname,docaillnessexplain,docatreatmentscheme,docaempdocid,empname,docadate 
+           from doctoradvice d,employee e,patient p
+		   <include refid="DoctoradviceCondition"/>
+  </select>
+  
+  <!-- 根据医嘱id查询对象 -->
+  <select id="findByDocaId" parameterType="Integer" resultMap="resultDoctoradvice">
+       select docaid,d.patid,patname,docaillnessexplain,docatreatmentscheme,docaempdocid,empname,docadate 
+           from doctoradvice d,employee e,patient p 
+           where docaid=#{docaid}
+  </select>
+  
+  <delete id="delete" parameterType="Integer">
+    update doctoradvice set isdelete=0 where docaid=#{docaid}
+  </delete>
+  
+  <insert id="add" parameterType="Doctoradvice">
+    insert into doctoradvice (patid, docadate,docaillnessexplain,docatreatmentscheme,docaempdocid, isdelete)
+    values (#{patid}, #{docadate},#{docaillnessexplain},#{docatreatmentscheme},#{docaempdocid},1)
+    <!-- 自动增长后的主键   -->
+    <selectKey keyColumn="docaid" keyProperty="docaid" resultType="int">
+    	SELECT LAST_INSERT_id()
+    </selectKey>
+  </insert>
+
+  <update id="update" parameterType="Doctoradvice">
+    update doctoradvice
+    <set>
+      <if test="patid != null">
+        patid = #{patid},
+      </if>
+      <if test="docaillnessexplain != null and docaillnessexplain !=''">
+        docaillnessexplain = #{docaillnessexplain},
+      </if>
+      <if test="docatreatmentscheme != null and docatreatmentscheme !=''">
+        docatreatmentscheme = #{docatreatmentscheme},
+      </if>
+      <if test="docaempdocid != null and docaempdocid !=''">
+        docaempdocid = #{docaempdocid},
+      </if>
+      <if test="docadate != null">
+        docadate = #{docadate}
+      </if>
+      where docaid=#{docaid}
+    </set>
+  </update>
+
+</mapper>

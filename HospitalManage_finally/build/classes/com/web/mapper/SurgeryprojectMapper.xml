@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.SurgeryprojectDao">
+
+	<resultMap type="Surgeryproject" id="resSurgeryproject">
+		<id column="surId" property="surid"/>
+		<result column="maId" property="maid"/>
+		<result column="name" property="name"/>
+		<result column="surRoomId" property="surroomid"/>
+		<result column="inpatId" property="inpatid"/>
+		<result column="chiefSurgeon" property="chiefsurgeon"/>
+		<result column="surDate" property="surdate"/>
+		
+		<association property="medicaladvice" javaType="Medicaladvice">
+             <!-- 主键 -->
+             <id column="maid" property="maid"/>
+       </association>
+       <association property="surgerroom" javaType="Surgerroom">
+             <!-- 主键 -->
+             <id column="surRoomId" property="surroomid"/>
+       </association>
+        <association property="inpatient" javaType="Inpatient">
+             <!-- 主键 -->
+             <id column="inpatid" property="inpatid"/>
+            <association property="pat" javaType="Patient">
+	             <!-- 主键 -->
+	             <id column="patid" property="patid"/>
+	             <result column="patname" property="patname"/>
+       		</association>
+       </association>
+        <association property="employee" javaType="Employee">
+             <!-- 主键 -->
+             <id column="empid" property="empid"/>
+             <result column="empname" property="empname"/>
+       </association>
+	</resultMap>
+
+	<sql id="conditionSql">
+		FROM surgeryproject sp, employee emp,surgerroom sr,medicaladvice ma,inpatient ip,patient p
+		WHERE sp.isDelete = 1 and emp.isDelete = 1 and sr.isDelete = 1 and ma.isDelete = 1 and ip.isDelete = 1 and
+		sp.maId = ma.maId and sp.chiefSurgeon = emp.empId and sp.inpatId = ip.inpatId and sp.surRoomId = sr.surRoomId
+		and ip.inpatId = p.patId
+		<if test="surId!=null and surId!=''">
+           and sp.surId = #{surId}
+        </if>
+        <if test="surRoom!=null and surRoom!=''">
+           and sr.surRoomid like concat('%',concat(#{surRoom},'%'))
+        </if>
+        <if test="surDoc!=null and surDoc!=''">
+           and sp.chiefSurgeon = #{surDoc}
+        </if>
+	</sql>
+	
+	<select id="queryByCondition" parameterType="map" resultMap="resSurgeryproject" >
+       SELECT * 
+       <include refid="conditionSql"></include>
+   </select>
+   
+   <!-- 手术室 -->
+   <select id="querySurRoom" resultType="Surgerroom">
+   		select * from surgerroom
+   </select>
+   <!-- 医嘱 -->
+   <select id="queryMA" resultType="Medicaladvice">
+   		select * from Medicaladvice
+   </select>
+   
+   
+   <update id="delete" parameterType = "Integer">
+    	update surgeryproject set isdelete = 0 where surid=#{surid}
+    </update>
+   
+   <insert id="add" parameterType="Surgeryproject">
+		insert into Surgeryproject (maId,name,surRoomId,inpatId,chiefSurgeon,isdelete) 
+		values (#{maid},#{name},#{surroomid},#{inpatid},#{chiefsurgeon},1)
+	</insert>
+	
+	<select id="findByID" parameterType="int" resultMap="resSurgeryproject">
+        select * from Surgeryproject where surid=#{surid}
+   </select>
+   
+    <!-- 修改 -->
+     <update id="update" parameterType="Surgeryproject">
+         update Surgeryproject 
+         set
+             maId=#{maid},
+		     name=#{name},
+		     surRoomId=#{surroomid},
+		     inpatId = #{inpatid},
+			chiefSurgeon=#{chiefsurgeon}
+		  where surid=#{surid}
+    </update>
+   
+</mapper>

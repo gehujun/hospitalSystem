@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.web.dao.testitemsDao">
+  <resultMap id="resultTestitems" type="Testitems">
+    <id column="testid" property="testid" />
+    <result column="testname" property="testname" />
+    <result column="testtype" property="testtype" />
+    <result column="testfee" property="testfee" />
+    <result column="testexplain" property="testexplain" />
+    <result column="testtaboo" property="testtaboo" />
+    <result column="isdelete" property="isdelete" />
+  </resultMap>
+  
+  <select id="query" resultMap="resultTestitems">
+           SELECT * from testitems
+  </select>
+  
+  <sql id="TestitemsCondition">
+    <where>
+      isdelete!=0
+      <if test="testid != null">
+      	and testid=#{testid}
+      </if>
+      <if test="testname != null and testname !=''">
+      	and testname like concat('%',concat(#{testname},'%'))
+      </if>
+      
+      <if test="testtype != null and testtype !=''">
+      	and testtype like concat('%',concat(#{testtype},'%'))
+      </if>
+      
+      <if test="testfee != null">
+      	and testfee=#{testfee}
+      </if>
+    </where>
+  </sql>
+  
+  <select id="queryByCondition" resultMap="resultTestitems" parameterType="map">
+           select * from testitems
+		   <include refid="TestitemsCondition"/>
+  </select>
+  
+  <!-- 根据检验项目id查询对象 -->
+  <select id="findByTestId" parameterType="Integer" resultMap="resultTestitems">
+       select * from testitems where testid=#{testid}
+  </select>
+  
+  <delete id="delete" parameterType="Integer">
+    update testitems set isdelete=0 where testid=#{testid}
+  </delete>
+  
+  <insert id="add" parameterType="Testitems">
+    insert into testitems (testname,testtype,testfee,testexplain,testtaboo,isdelete)
+    values (#{testname},#{testtype},#{testfee},#{testexplain},#{testtaboo},1)
+    <!-- 自动增长后的主键   -->
+    <selectKey keyColumn="testid" keyProperty="testid" resultType="int">
+    	SELECT LAST_INSERT_id()
+    </selectKey>
+  </insert>
+  
+  <update id="update" parameterType="Testitems">
+    update testitems
+    <set>
+      <if test="testname != null and testname != ''">
+        testname = #{testname},
+      </if>
+      <if test="testtype != null and testtype!= ''">
+        testtype = #{testtype},
+      </if>
+      <if test="testfee != null">
+        testfee = #{testfee},
+      </if>
+      <if test="testexplain != null and testexplain != ''">
+        testexplain = #{testexplain},
+      </if>
+      <if test="testtaboo != null and testtaboo != ''">
+        testtaboo = #{testtaboo}
+      </if>
+      
+    </set>
+    where testid=#{testid}
+  </update>
+  
+</mapper>

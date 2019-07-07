@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.FacilitiesDao">
+	
+	<resultMap type="Facilities" id="resFacilities">
+		<id column="faciid" property="faciid"/>
+		<result column="faciname" property="faciname"/>
+		<result column="faciprice" property="faciprice"/>
+		<result column="facinum" property="facinum"/>
+		<result column="facifirm" property="facifirm"/>
+		<result column="facideptid" property="facideptid"/>
+		<result column="isdelete" property="isdelete"/>
+		
+	<association property="dep" javaType="Department">
+		<id column="deptid" property="deptid"/>
+		<result column="deptname" property="deptname"/>
+	</association>
+	
+	
+	</resultMap>
+	
+	<sql id="conditionSql">
+		<if test="facifirm!=null and  facifirm!=''">
+			and f.facifirm like concat('%',concat(#{facifirm},'%'))
+		</if>
+		<if test="faciname !=null and faciname!=''">
+			and f.faciname like concat('%',concat(#{faciname},'%'))
+		</if>
+	</sql>
+
+	<sql id="basedCondition">
+		from Department where isdelete = 1
+	</sql>
+	
+	<sql id="joinQuerySql">
+		from Department dep,Facilities f where f.facideptid=dep.deptid and f.isdelete=1
+	</sql>
+
+	
+	<select id="queryByCondition" parameterType="map" resultMap="resFacilities">
+        SELECT *
+	<include refid="joinQuerySql"></include>
+		<include refid="conditionSql"></include>
+		
+   </select>
+	<select id="queryByJoin" resultType="Department">
+        SELECT *
+   		<include refid="basedCondition"></include>
+   </select>
+   
+   <select id="query" resultMap="resFacilities">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+   
+	<select id="findById" parameterType="Integer" resultType="Facilities">
+        select * from facilities where faciid =#{faciid}
+   </select>
+
+	<update id="deleteById" parameterType="Facilities">
+		update facilities set isDelete = 0 where faciid = #{faciid}
+	</update>
+
+
+	<insert id="addFacilities" parameterType="Facilities">
+	
+	
+		insert into Facilities 
+		(faciname,faciprice,facinum,facifirm,facideptid,isdelete)
+		values (#{faciname},#{faciprice},#{facinum},#{facifirm},#{facideptid},1)
+		
+		
+		<selectKey keyColumn="faciid" keyProperty="faciid" resultType="Integer">
+         	SELECT LAST_INSERT_id()
+         </selectKey>
+	</insert>
+	
+	<update id="updateFacilities" parameterType="Facilities">
+		update facilities set
+		<if test="faciname!=null and faciname!=''">
+			faciname=#{faciname},
+			</if>
+		<if test="faciprice!=null and faciprice!='' ">
+			faciprice=#{faciprice},
+		 	</if>
+		 <if test="facinum!=null and facinum!='' ">
+		 	facinum=#{facinum},
+		 	</if>
+		 <if test=" facifirm!=null and facifirm!=''">
+		 	facifirm=#{facifirm},
+		 	</if>
+		<if test="facideptid!=null and  facideptid!=''">
+             facideptid=#{facideptid}
+        	</if>
+		where faciid = #{faciid}
+	</update>
+
+</mapper>

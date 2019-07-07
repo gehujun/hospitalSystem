@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.web.dao.PurchaseDao">
+
+
+	<resultMap type="Purchase" id="resPurchase">
+		<id column="purid" property="purid"/>
+		<result column="purname" property="purname"/>
+		<result column="supid" property="supid"/>
+		<result column="empid" property="empid"/>
+		<result column="purdate" property="purdate"/>
+		<result column="purnum" property="purnum"/>
+		<result column="purfee" property="purfee"/>
+		<result column="isdelete" property="isdelete"/>
+		
+	<association property="sup" javaType="Supplier">
+		<id column="supid" property="supid"/> 	
+		<result column="supname" property="supname"/>
+	</association>
+	
+	<association property="emp" javaType="Employee">
+		<id column="empid" property="empid"/> 	
+		<result column="empname" property="empname"/>
+	</association>
+	
+	</resultMap>
+	
+	<select id="querySupId" resultType="Supplier">
+		select * from Supplier where isdelete = 1
+	</select>
+		
+	<select id="queryEmpId" resultType="Employee">
+		select * from Employee where isdelete = 1
+	</select>
+	
+	<sql id="joinQuerySql">
+		FROM Purchase pur,Employee emp, Supplier sup where pur.supid=sup.supid and  pur.empid = emp.empid and pur.isdelete = 1
+	</sql>
+	
+	<select id="queryByJoin" resultMap="resPurchase">
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+    </select>
+	
+	<select id="query" resultMap="resPurchase">
+        SELECT *
+        <include refid="joinQuerySql"></include>
+   </select>
+   
+   <sql id="conditionSql">
+		<if test="supname!=null and supname!=''">
+			and sup.supname like concat('%',concat(#{supname},'%'))
+		</if>
+		
+		<if test="empname!=null and empname!=''">
+			and emp.empname like concat('%',concat(#{empname},'%'))
+		</if>
+		<if test="purname!=null and purname!=''">
+			and pur.purname like concat('%',concat(#{purname},'%'))
+		
+		</if>
+	</sql>
+	
+	<select id="queryByCondition" parameterType="map" resultMap="resPurchase" >
+        SELECT *
+   		<include refid="joinQuerySql"></include>
+   		<include refid="conditionSql"></include>
+   </select>
+   
+	<select id="findById" parameterType="Integer" resultType="Purchase">
+        select * from Purchase where purid = #{purid}
+   </select>
+
+	<update id="deleteById" parameterType="Purchase">
+		update Purchase set isdelete = 0 where purid = #{purid}
+	</update>
+	
+		<update id="updatePurchase" parameterType="Purchase">
+		update Purchase set
+		<if test="supid !=null and  supid !=''">
+             supid=#{supid},
+        </if>
+        <if test="empid   !=null and  empid !=''">
+             empid=#{empid},
+        </if>
+		<if test="purname !=null and  purname !=''">
+             purname=#{purname},
+        </if>
+		
+		<if test="purdate  !=null and  purdate !=''">
+             purdate=#{purdate},
+        </if>
+        
+		<if test="purnum   !=null and  purnum !=''">
+             purnum=#{purnum},
+        </if>
+		<if test="purfee   !=null and  purfee  !=''">
+             purfee=#{purfee}
+        </if>
+		where purid = #{purid}
+	</update>
+
+	<insert id="addPurchase" parameterType="Purchase">
+		insert into Purchase 
+		(purname,supid,empid,purdate ,purnum ,purfee ,isdelete)
+		values (#{purname},#{supid},#{empid},#{purdate},#{purnum},#{purfee},1)
+		
+<!-- 		 自动增长后的主键   -->
+         <selectKey keyColumn="purid" keyProperty="purid" resultType="Integer">
+         	SELECT LAST_INSERT_id()
+         </selectKey>
+
+	</insert>
+	
+
+</mapper>

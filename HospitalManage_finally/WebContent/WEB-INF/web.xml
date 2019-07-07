@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd" id="WebApp_ID" version="3.0">
+  <display-name>HospitalManager</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  
+  <!-- 配置过滤器 -->
+  <filter>
+       <filter-name>CharacterEncondingFilter</filter-name>
+       <filter-class>com.web.filter.CharacterEncondingFilter</filter-class>
+  </filter>
+  
+  <!-- 过滤器的映射   /*:对项目中所有的文件进行编码过滤-->
+  <filter-mapping>
+       <filter-name>CharacterEncondingFilter</filter-name>
+       <url-pattern>/*</url-pattern>
+  </filter-mapping>
+  
+   <!-- 验证码 -->
+  <servlet>
+      <servlet-name>KaptchaServlet</servlet-name>
+      <servlet-class>com.google.code.kaptcha.servlet.KaptchaServlet</servlet-class>
+       <init-param>  
+	        <param-name>kaptcha.image.width</param-name>  
+	        <param-value>200</param-value>  
+	    </init-param>  
+	    <init-param>  
+	        <param-name>kaptcha.image.height</param-name>  
+	        <param-value>50</param-value>  
+	    </init-param>  
+	    <init-param>  
+	        <param-name>kaptcha.textproducer.char.length</param-name>  
+	        <param-value>5</param-value>  
+	    </init-param> 
+	    <init-param>
+	         <param-name>kaptcha.border.color</param-name>
+	         <param-value>blue</param-value>
+	    </init-param>
+	    <init-param>
+	        <param-name>kaptcha.textproducer.font.names</param-name>
+	        <param-value>Arial</param-value>
+	    </init-param>
+	    <init-param>
+	         <param-name>kaptcha.textproducer.font.size</param-name>
+	         <param-value>30</param-value>
+	    </init-param>
+	    <init-param>
+	        <param-name>kaptcha.textproducer.font.color</param-name>
+	        <param-value>blue</param-value>
+	    </init-param>
+  </servlet>
+  
+  <servlet-mapping>
+      <servlet-name>KaptchaServlet</servlet-name>
+      <url-pattern>/kaptcha.do</url-pattern>
+  </servlet-mapping>
+</web-app>

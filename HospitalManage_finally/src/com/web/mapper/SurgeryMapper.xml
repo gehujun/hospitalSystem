@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--namespace:命名空间  -->
+<mapper namespace="com.web.dao.SurgeryDao">
+
+   <!-- 自定义结果集 -->
+   <resultMap type="Surgery" id="resultSurgery">
+   
+     <!-- 主键   column:表中的字段名称      property:类中的属性名称 -->
+      <id column="surgid" property="surgid"/>
+      
+      <result column="surgname" property="surgname"/>
+      <result column="surgprofid" property="surgprofid"/>
+      <result column="surgpushfee" property="surgpushfee"/>
+      <result column="surgfee" property="surgfee"/>
+      <result column="isdelete" property="isdelete"/>
+      
+       <!-- 多对一   property:属性名称   javaType：关联的对象类型-->
+     <association property="professionaltitle" javaType="Professionaltitle">
+         <id column="profid" property="profid"/>
+        
+         <result column="profname" property="profname"/>
+         <!-- <result column="userBirthday" property="userBirthday"/>
+         <result column="userCard" property="userCard"/> -->
+     </association>
+  
+     <!-- 一对多   ofType:关联的对象
+     <collection property="positionList" ofType="TPosition">
+           <id column="poId" property="poId"/>
+           
+           <result column="poName" property="poName"/>
+           <result column="surgid" property="surgid"/>
+           <result column="poSalary" property="poSalary"/>
+           <result column="isdelete" property="isdelete"/>
+     </collection> -->
+     
+   </resultMap>
+ 
+     <!-- 查询 
+             SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.surgid=d.surgid
+     -->
+     <select id="query" resultMap="resultSurgery">
+          SELECT s.*,p.*
+		    from Surgery s,Professionaltitle p
+		       where s.surgprofid=p.profid
+              and s.isdelte!=0
+     </select>
+    
+     
+     <!-- 自定义SQL语句，以便于其他地方重复使用 -->
+     <sql id="SurgeryCondition">
+           <where>
+		          s.surgprofid=p.profid
+		         <if test="surgname!=null and  surgname!=''">
+				       and s.surgname like concat('%',concat(#{surgname},'%'))
+				  </if>
+				  <if test="surgpushfee !=null and surgpushfee!=''">
+				      and s.surgfee like concat('%',concat(#{surgfee},'%'))
+				  </if>
+				  <!-- <if test="surgprofid !=null and surgprofid!=''">
+				      and d.surgprofid like concat('%',concat(#{surgprofid},'%'))
+				  </if> -->
+				  and s.isdelete!=0
+		    </where>
+     </sql>
+
+   <!--resultMap:结果集      parameterType:参数类型
+    SELECT d.*,p.*
+		    from t_position p,t_department d
+		       where p.surgid=d.surgid
+		  <if test="surgname!=null and  surgname!=''">
+		       and d.surgname like concat('%',concat(#{surgname},'%'))
+		  </if>
+		  <if test="surgpushfee !=null and surgpushfee!=''">
+		      and d.surgpushfee like concat('%',concat(#{surgpushfee},'%'))
+		  </if>
+		  
+		  include:包含     refid:引用的id名称-->
+    <select id="queryByCondition" resultMap="resultSurgery" parameterType="Surgery">
+		    SELECT s.*,p.*
+		    from Surgery s,Professionaltitle p
+		       
+		   <include refid="SurgeryCondition"/>
+    </select>
+    
+    <!-- 
+     SELECT d.*,p.*
+		    from t_position p,t_department d
+         where p.surgid=d.surgid
+           and d.surgid in (1,2,3)
+           collection:集合    open：开始标签    close:结束标签      item:集合中的每个对象（变量）
+           separator:分隔符
+     -->
+<!--     <select id="queryByIds" parameterType="Integer" resultMap="resultDeparment" >
+            SELECT d.*,p.*
+		    from t_position p,t_department d
+		    <where>
+		         p.surgid=d.surgid
+		         <if test="ids != null and ids.size>0">
+			         <foreach collection="ids" open="and d.surgid in (" close=")" item="surgid" separator="," >
+			               #{surgid}
+			         </foreach>
+		         </if>
+		    </where>
+    </select> -->
+    
+    <!-- 根据id查询对象 -->
+    <select id="findById" parameterType="Integer" resultType="Surgery">
+       select * from Surgery where surgid=#{surgid}
+    </select>
+    
+    <!-- 修改 -->
+    <update id="update" parameterType="Surgery">
+         update Surgery set
+          <if test="surgname!=null and  surgname!=''">
+             surgname=#{surgname},
+          </if>
+           <if test="surgprofid!=null and  surgprofid!=''">
+		      surgprofid=#{surgprofid},
+		  </if>
+		   <if test="surgpushfee!=null and  surgpushfee!=''">
+		      surgpushfee=#{surgpushfee},
+		  </if>
+		  <if test="surgfee!=null and  surgfee!=''">
+		      surgfee=#{surgfee}
+		  </if>
+		  where surgid=#{surgid}
+    </update>
+    
+    <!-- 删除 -->
+    <delete id="delete" parameterType = "Integer">
+    		<!-- delete from t_position where surgid=#{surgid}; -->
+    		<!-- delete fromSurgery where surgid=#{surgid} -->
+    		update Surgery set isdelete = 0 where surgid=#{surgid}
+    </delete>
+    
+    <insert id="add" parameterType="Surgery">     
+	   insert into Surgery (surgname, surgprofid, surgpushfee,surgfee,isdelete)
+	   values (#{surgname}, #{surgprofid},#{surgpushfee},#{surgfee},1)
+	   <!-- 自动增长后的主键   -->
+	   <selectKey keyColumn="surgid" keyProperty="surgid" resultType="int">
+	   	SELECT LAST_INSERT_id()
+	   </selectKey>
+    </insert>
+    
+</mapper>
+
